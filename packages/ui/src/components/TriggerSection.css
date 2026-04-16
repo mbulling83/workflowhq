@@ -1,0 +1,23 @@
+.trigger-section {
+  margin: 0;
+}
+
+.trigger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Grid layout */
+.trigger-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .trigger-list-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
