@@ -2,7 +2,7 @@ import { Workflow, Node, TriggerInfo, TriggerDetails, ConnectedToolInfo } from '
 
 const N8N_URL = import.meta.env.VITE_N8N_URL || ''
 
-export function parseWorkflows(workflows: Workflow[]): TriggerInfo[] {
+export function parseWorkflows(workflows: Workflow[], baseUrl?: string): TriggerInfo[] {
   const triggers: TriggerInfo[] = []
 
   workflows.forEach((workflow) => {
@@ -69,7 +69,7 @@ export function parseWorkflows(workflows: Workflow[]): TriggerInfo[] {
 
     // Parse trigger nodes
     uniqueTriggerNodes.forEach((node) => {
-      const triggerInfo = parseNode(node, workflow)
+      const triggerInfo = parseNode(node, workflow, baseUrl)
       if (triggerInfo) {
         triggers.push(triggerInfo)
       }
@@ -116,7 +116,7 @@ export function parseWorkflows(workflows: Workflow[]): TriggerInfo[] {
   return triggers
 }
 
-function parseNode(node: Node, workflow: Workflow): TriggerInfo | null {
+function parseNode(node: Node, workflow: Workflow, baseUrl?: string): TriggerInfo | null {
   const details: TriggerDetails = {}
   let triggerType: 'cron' | 'webhook' | 'ai' | 'manual' | 'other' = 'other'
 
@@ -647,16 +647,16 @@ function parseNode(node: Node, workflow: Workflow): TriggerInfo | null {
     // Construct webhook URL
     // N8N uses /webhook/{path} for production (active workflows) and /webhook-test/{path} for test mode
     // The path is what's set in node.parameters.path, not the webhookId
-    const baseUrl = N8N_URL.replace(/\/$/, '')
+    const resolvedBaseUrl = (baseUrl ?? N8N_URL).replace(/\/$/, '')
     const webhookType = workflow.active ? 'webhook' : 'webhook-test'
     
     if (webhookPath) {
       // Remove leading slash if present and ensure no trailing slash
       const cleanPath = webhookPath.startsWith('/') ? webhookPath.slice(1) : webhookPath
-      details.webhookUrl = `${baseUrl}/${webhookType}/${cleanPath}`
+      details.webhookUrl = `${resolvedBaseUrl}/${webhookType}/${cleanPath}`
     } else if (node.webhookId) {
       // Fallback to webhookId if path is not set (for some trigger types like Telegram)
-      details.webhookUrl = `${baseUrl}/${webhookType}/${node.webhookId}`
+      details.webhookUrl = `${resolvedBaseUrl}/${webhookType}/${node.webhookId}`
     } else {
       details.webhookUrl = 'Not available'
     }

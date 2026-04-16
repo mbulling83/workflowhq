@@ -17,9 +17,10 @@ interface WorkflowListProps {
   workflows: Workflow[]
   onWorkflowUpdate: () => void
   updateWorkflow: (workflowId: string, data: Partial<Workflow>) => Promise<Workflow>
+  n8nBaseUrl?: string
 }
 
-function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow }: WorkflowListProps) {
+function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl }: WorkflowListProps) {
   const [filters, setFilters] = useState<FilterState>({ active: 'active' })
   const [searchQuery, setSearchQuery] = useState('')
   const [searchQueryPerTab, setSearchQueryPerTab] = useState<Record<string, string>>({})
@@ -240,7 +241,7 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow }: WorkflowL
 
     // Refresh workflows
     onWorkflowUpdate()
-  }, [workflows, onWorkflowUpdate])
+  }, [workflows, onWorkflowUpdate, updateWorkflow])
 
   return (
     <Tabs tabs={tabs} onTabChange={handleTabChange}>
@@ -304,43 +305,48 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow }: WorkflowL
                   type="cron"
                   layout={layout}
                   onPromptUpdate={handlePromptUpdate}
+                  n8nBaseUrl={n8nBaseUrl}
                 />
               )
             )}
             {currentTab === 'webhook' && (
-              <TriggerSection 
-                title="Webhook Triggers" 
+              <TriggerSection
+                title="Webhook Triggers"
                 triggers={filteredGroups.webhook}
                 type="webhook"
                 layout={layout}
                 onPromptUpdate={handlePromptUpdate}
+                n8nBaseUrl={n8nBaseUrl}
               />
             )}
             {currentTab === 'ai' && (
-              <TriggerSection 
-                title="AI Agents" 
+              <TriggerSection
+                title="AI Agents"
                 triggers={filteredGroups.ai}
                 type="ai"
                 layout={layout}
                 onPromptUpdate={handlePromptUpdate}
+                n8nBaseUrl={n8nBaseUrl}
               />
             )}
             {currentTab === 'manual' && (
-              <TriggerSection 
-                title="Manual Triggers" 
+              <TriggerSection
+                title="Manual Triggers"
                 triggers={filteredGroups.manual}
                 type="manual"
                 layout={layout}
                 onPromptUpdate={handlePromptUpdate}
+                n8nBaseUrl={n8nBaseUrl}
               />
             )}
             {currentTab === 'other' && filteredGroups.other.length > 0 && (
-              <TriggerSection 
-                title="Other Triggers" 
+              <TriggerSection
+                title="Other Triggers"
                 triggers={filteredGroups.other}
                 type="other"
                 layout={layout}
                 onPromptUpdate={handlePromptUpdate}
+                n8nBaseUrl={n8nBaseUrl}
               />
             )}
             {currentTriggers.length === 0 && (() => {

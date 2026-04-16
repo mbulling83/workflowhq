@@ -8,6 +8,7 @@ interface TriggerItemProps {
   triggers: TriggerInfo[]
   type: 'cron' | 'webhook' | 'ai' | 'tool' | 'manual' | 'other'
   onPromptUpdate: (workflowId: string, nodeId: string, newPrompt: string) => Promise<void>
+  n8nBaseUrl?: string
 }
 
 function buildToolPillTitle(t: ConnectedToolInfo): string {
@@ -20,14 +21,13 @@ function buildToolPillTitle(t: ConnectedToolInfo): string {
   return parts.join('\n\n')
 }
 
-function TriggerItem({ triggers, type, onPromptUpdate }: TriggerItemProps) {
+function TriggerItem({ triggers, type, onPromptUpdate, n8nBaseUrl }: TriggerItemProps) {
   // All triggers in the array are from the same workflow
   const workflow = triggers[0]
 
-  // Get the configured N8N URL from localStorage or environment
+  // Get the configured N8N URL from prop, localStorage or environment
   const getN8NBaseUrl = (): string | null => {
-    const storedUrl = localStorage.getItem('n8n_url')
-    const configuredUrl = storedUrl || import.meta.env.VITE_N8N_URL
+    const configuredUrl = n8nBaseUrl || localStorage.getItem('n8n_url') || import.meta.env.VITE_N8N_URL
 
     if (!configuredUrl) return null
 

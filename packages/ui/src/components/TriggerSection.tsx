@@ -9,9 +9,10 @@ interface TriggerSectionProps {
   type: 'cron' | 'webhook' | 'ai' | 'tool' | 'manual' | 'other'
   layout: LayoutType
   onPromptUpdate: (workflowId: string, nodeId: string, newPrompt: string) => Promise<void>
+  n8nBaseUrl?: string
 }
 
-function TriggerSection({ triggers, type, layout, onPromptUpdate }: TriggerSectionProps) {
+function TriggerSection({ triggers, type, layout, onPromptUpdate, n8nBaseUrl }: TriggerSectionProps) {
   if (triggers.length === 0) {
     return null
   }
@@ -30,11 +31,12 @@ function TriggerSection({ triggers, type, layout, onPromptUpdate }: TriggerSecti
     <section className="trigger-section">
       <div className={`trigger-list trigger-list-${layout}`}>
         {Object.entries(groupedByWorkflow).map(([workflowId, workflowTriggers]) => (
-          <TriggerItem 
+          <TriggerItem
             key={workflowId}
             triggers={workflowTriggers}
             type={type}
             onPromptUpdate={onPromptUpdate}
+            n8nBaseUrl={n8nBaseUrl}
           />
         ))}
       </div>
