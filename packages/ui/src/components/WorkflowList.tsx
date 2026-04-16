@@ -11,7 +11,7 @@ import SearchBar from './SearchBar'
 import LayoutSelector, { LayoutType } from './LayoutSelector'
 import Tabs from './Tabs'
 import CronCalendar from './CronCalendar'
-import './WorkflowList.css'
+import { cn } from '../lib/utils'
 
 interface WorkflowListProps {
   workflows: Workflow[]
@@ -254,8 +254,8 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
         const hasExecutedData = unfilteredTriggers.some(trigger => trigger.lastExecuted != null)
         
         return (
-          <div className="workflow-list">
-            <div className="controls-row">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-2">
               <SearchBar
                 value={searchQuery}
                 onChange={(query) => handleSearchChange(currentTab, query)}
@@ -274,21 +274,25 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
                 hasExecutedData={hasExecutedData}
               />
               {currentTab === 'cron' && (
-                <div className="view-toggle">
+                <div className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 p-0.5">
                   <button
-                    className={`view-toggle-button ${cronView === 'list' ? 'active' : ''}`}
+                    className={cn(
+                      'px-3 py-1 text-xs rounded-md transition-colors',
+                      cronView === 'list'
+                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                    )}
                     onClick={() => setCronView('list')}
-                    title="List view"
-                  >
-                    List
-                  </button>
+                  >List</button>
                   <button
-                    className={`view-toggle-button ${cronView === 'calendar' ? 'active' : ''}`}
+                    className={cn(
+                      'px-3 py-1 text-xs rounded-md transition-colors',
+                      cronView === 'calendar'
+                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                    )}
                     onClick={() => setCronView('calendar')}
-                    title="Calendar view"
-                  >
-                    Calendar
-                  </button>
+                  >Calendar</button>
                 </div>
               )}
               {currentTab !== 'cron' && (
@@ -357,21 +361,21 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
 
               if (genuinelyEmpty) {
                 return (
-                  <div className="no-results">
-                    <span className="no-results-label">All quiet here.</span>
+                  <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-2">
+                    <span className="text-sm">All quiet here.</span>
                   </div>
                 )
               }
               return (
-                <div className="no-results">
-                  <span className="no-results-label">
+                <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-2">
+                  <span className="text-sm">
                     {isFiltered
                       ? 'Nothing matching. Your filters might be too strict.'
                       : 'No workflows found.'}
                   </span>
                   {isFiltered && (
                     <button
-                      className="no-results-clear"
+                      className="text-sm text-slate-600 underline underline-offset-2 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                       onClick={() => {
                         setFilters({})
                         handleSearchChange(currentTab, '')

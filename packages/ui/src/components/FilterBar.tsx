@@ -1,6 +1,6 @@
 import { TriggerInfo } from '../types'
 import { getTriggerTypeCategory } from '../utils/formatTriggerType'
-import './FilterBar.css'
+import { cn } from '../lib/utils'
 
 const MODEL_IDENTIFIER_PATTERN = /\b(gpt|claude|gemini|llama|mistral|qwen|deepseek|mixtral|command|sonar|text-embedding|embedding|phi|o[1-9])\b/i
 const TOOL_IDENTIFIER_PATTERN = /\b(tool|http|request|weather|calendar|function|vector|database|sql|search|scrape|fetch|get|send|read|write|api)\b/i
@@ -48,6 +48,9 @@ interface FilterBarProps {
   filters: FilterState
   onFilterChange: (filters: FilterState) => void
 }
+
+const selectClass = 'rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 outline-none focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 transition-colors'
+const labelClass = 'text-xs font-medium text-slate-500 dark:text-slate-400'
 
 function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) {
   // Get unique values for filter options
@@ -126,11 +129,11 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
   }
 
   return (
-    <div className="filter-bar">
-      <div className="filter-group">
-        <label className="filter-label">Status:</label>
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        <label className={labelClass}>Status:</label>
         <select
-          className="filter-select"
+          className={selectClass}
           value={filters.active || 'all'}
           onChange={(e) => updateFilter('active', e.target.value)}
         >
@@ -141,10 +144,10 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
       </div>
 
       {type === 'cron' && uniqueTimezones.length > 0 && (
-        <div className="filter-group">
-          <label className="filter-label">Timezone:</label>
+        <div className="flex items-center gap-1.5">
+          <label className={labelClass}>Timezone:</label>
           <select
-            className="filter-select"
+            className={selectClass}
             value={filters.timezone || 'all'}
             onChange={(e) => updateFilter('timezone', e.target.value)}
           >
@@ -159,16 +162,16 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
       {type === 'webhook' && (
         <>
           {uniqueHttpMethods.length > 0 && (
-            <div className="filter-group filter-group-checkboxes">
-              <label className="filter-label">Method:</label>
-              <div className="checkbox-group">
+            <div className="flex items-center gap-1.5">
+              <label className={labelClass}>Method:</label>
+              <div className="flex items-center gap-1.5">
                 {uniqueHttpMethods.map(method => {
                   const isChecked = filters.httpMethods?.includes(method) || false
                   return (
-                    <label key={method} className="checkbox-label">
+                    <label key={method} className="flex items-center gap-1 cursor-pointer">
                       <input
                         type="checkbox"
-                        className="filter-checkbox"
+                        className="rounded border-slate-300 dark:border-slate-600 accent-slate-900 dark:accent-slate-100"
                         checked={isChecked}
                         onChange={(e) => {
                           const currentMethods = filters.httpMethods || []
@@ -178,21 +181,21 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
                           onFilterChange({
                             ...filters,
                             httpMethods: newMethods.length > 0 ? newMethods : undefined,
-                            httpMethod: undefined, // Clear old single method filter
+                            httpMethod: undefined,
                           })
                         }}
                       />
-                      <span className="checkbox-text">{method}</span>
+                      <span className={cn(labelClass, 'cursor-pointer')}>{method}</span>
                     </label>
                   )
                 })}
               </div>
             </div>
           )}
-          <div className="filter-group">
-            <label className="filter-label">Auth:</label>
+          <div className="flex items-center gap-1.5">
+            <label className={labelClass}>Auth:</label>
             <select
-              className="filter-select"
+              className={selectClass}
               value={filters.hasAuth || 'all'}
               onChange={(e) => updateFilter('hasAuth', e.target.value)}
             >
@@ -207,10 +210,10 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
       {type === 'ai' && (
         <>
           {uniqueProviders.length > 0 && (
-            <div className="filter-group">
-              <label className="filter-label">Provider:</label>
+            <div className="flex items-center gap-1.5">
+              <label className={labelClass}>Provider:</label>
               <select
-                className="filter-select"
+                className={selectClass}
                 value={filters.provider || 'all'}
                 onChange={(e) => updateFilter('provider', e.target.value)}
               >
@@ -222,10 +225,10 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
             </div>
           )}
           {uniqueModels.length > 0 && (
-            <div className="filter-group">
-              <label className="filter-label">Model:</label>
+            <div className="flex items-center gap-1.5">
+              <label className={labelClass}>Model:</label>
               <select
-                className="filter-select"
+                className={selectClass}
                 value={filters.model || 'all'}
                 onChange={(e) => updateFilter('model', e.target.value)}
               >
@@ -237,10 +240,10 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
             </div>
           )}
           {uniqueToolTypes.length > 0 && (
-            <div className="filter-group">
-              <label className="filter-label">Uses tool:</label>
+            <div className="flex items-center gap-1.5">
+              <label className={labelClass}>Uses tool:</label>
               <select
-                className="filter-select"
+                className={selectClass}
                 value={filters.toolType || 'all'}
                 onChange={(e) => updateFilter('toolType', e.target.value)}
               >
@@ -257,10 +260,10 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
       {type === 'other' && (
         <>
           {uniqueTriggerTypes.length > 0 && (
-            <div className="filter-group">
-              <label className="filter-label">Trigger Type:</label>
+            <div className="flex items-center gap-1.5">
+              <label className={labelClass}>Trigger Type:</label>
               <select
-                className="filter-select"
+                className={selectClass}
                 value={filters.triggerType || 'all'}
                 onChange={(e) => updateFilter('triggerType', e.target.value)}
               >

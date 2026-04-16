@@ -1,7 +1,6 @@
 import { TriggerInfo } from '../types'
 import TriggerItem from './TriggerItem'
 import { LayoutType } from './LayoutSelector'
-import './TriggerSection.css'
 
 interface TriggerSectionProps {
   title: string
@@ -13,23 +12,22 @@ interface TriggerSectionProps {
 }
 
 function TriggerSection({ triggers, type, layout, onPromptUpdate, n8nBaseUrl }: TriggerSectionProps) {
-  if (triggers.length === 0) {
-    return null
-  }
+  if (triggers.length === 0) return null
 
-  // Group triggers by workflow
   const groupedByWorkflow = triggers.reduce((acc, trigger) => {
     const workflowId = String(trigger.workflowId)
-    if (!acc[workflowId]) {
-      acc[workflowId] = []
-    }
+    if (!acc[workflowId]) acc[workflowId] = []
     acc[workflowId].push(trigger)
     return acc
   }, {} as Record<string, TriggerInfo[]>)
 
+  const gridClass = layout === 'grid'
+    ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'
+    : 'flex flex-col gap-3'
+
   return (
-    <section className="trigger-section">
-      <div className={`trigger-list trigger-list-${layout}`}>
+    <section>
+      <div className={gridClass}>
         {Object.entries(groupedByWorkflow).map(([workflowId, workflowTriggers]) => (
           <TriggerItem
             key={workflowId}

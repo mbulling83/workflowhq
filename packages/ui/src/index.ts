@@ -26,3 +26,9 @@ export { parseWorkflows } from './utils/workflowParser'
 export { filterTriggers } from './utils/filterTriggers'
 export { sortTriggers } from './utils/sortTriggers'
 export { getTriggerTypeCategory } from './utils/formatTriggerType'
+
+// UI Primitives
+export { Badge } from './components/ui/badge'
+export { Card, CardHeader, CardContent } from './components/ui/card'
+export { Separator } from './components/ui/separator'
+export { cn } from './lib/utils'

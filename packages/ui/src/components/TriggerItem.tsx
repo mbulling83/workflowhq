@@ -2,7 +2,9 @@ import { TriggerInfo, ConnectedToolInfo } from '../types'
 import ProviderLogo from './ProviderLogo'
 import EditablePrompt from './EditablePrompt'
 import { formatTriggerType } from '../utils/formatTriggerType'
-import './TriggerItem.css'
+import { cn } from '../lib/utils'
+import { Badge } from './ui/badge'
+import { Card, CardHeader, CardContent } from './ui/card'
 
 interface TriggerItemProps {
   triggers: TriggerInfo[]
@@ -21,241 +23,217 @@ function buildToolPillTitle(t: ConnectedToolInfo): string {
   return parts.join('\n\n')
 }
 
+function DetailRow({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+  return (
+    <div className={cn('flex gap-2', full ? 'flex-col' : 'flex-row items-start')}>
+      <span className="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0 w-20">{label}</span>
+      <span className="text-sm text-slate-700 dark:text-slate-300 min-w-0">{children}</span>
+    </div>
+  )
+}
+
 function TriggerItem({ triggers, type, onPromptUpdate, n8nBaseUrl }: TriggerItemProps) {
-  // All triggers in the array are from the same workflow
   const workflow = triggers[0]
 
-  // Get the configured N8N URL from prop, localStorage or environment
   const getN8NBaseUrl = (): string | null => {
     const configuredUrl = n8nBaseUrl || localStorage.getItem('n8n_url') || import.meta.env.VITE_N8N_URL
-
     if (!configuredUrl) return null
-
-    // Extract base URL from webhook URL if it contains /webhook/ or /webhook-test/
-    // e.g., https://n8n.example.com/webhook/abc123 -> https://n8n.example.com
     let baseUrl = configuredUrl
-
-    // Remove /api/v1/workflows from the end if present
     baseUrl = baseUrl.replace(/\/api\/v1\/workflows\/?$/, '')
-
-    // If it's a webhook URL, extract just the domain
     const webhookMatch = baseUrl.match(/^(https?:\/\/[^/]+)/)
-    if (webhookMatch) {
-      baseUrl = webhookMatch[1]
-    }
-
+    if (webhookMatch) baseUrl = webhookMatch[1]
     return baseUrl
   }
 
   const baseUrl = getN8NBaseUrl()
   const workflowUrl = baseUrl ? `${baseUrl}/workflow/${workflow.workflowId}` : null
-  
+
   return (
-    <div className={`trigger-item ${workflow.active ? 'active' : 'inactive'}`}>
-      <div className="trigger-header">
-        <div className="trigger-header-left">
-          <h3 className="trigger-workflow-name">{workflow.workflowName}</h3>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-50 truncate">
+            {workflow.workflowName}
+          </h3>
           {workflowUrl && (
             <a
               href={workflowUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="workflow-link"
-              title={`Open "${workflow.workflowName}" in N8N`}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shrink-0 transition-colors"
+              title={`Open in n8n`}
             >
-              ↗
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M3.5 1H11M11 1V8.5M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </a>
           )}
           {triggers.length > 1 && (
-            <span className="trigger-count">{triggers.length} triggers</span>
+            <Badge variant="secondary">{triggers.length} triggers</Badge>
           )}
         </div>
-        <span className={`trigger-status ${workflow.active ? 'status-active' : 'status-inactive'}`}>
+        <Badge variant={workflow.active ? 'success' : 'secondary'}>
           {workflow.active ? 'Active' : 'Inactive'}
-        </span>
-      </div>
-      
-      {triggers.map((trigger, index) => (
-        <div key={`${trigger.nodeId}-${index}`} className={`trigger-node-section ${index > 0 ? 'trigger-node-separator' : ''}`}>
-          {triggers.length > 1 && (
-            <div className="trigger-node-header">
-              <span className="trigger-node-name">{trigger.nodeName}</span>
-            </div>
-          )}
-          
-          <div className="trigger-details-grid">
-            {type === 'cron' && (
-              <>
-                {trigger.details.description && (
-                  <div className="detail-row detail-row-full">
-                    <span className="detail-label">Description:</span>
-                    <span className="detail-value description-text">{trigger.details.description}</span>
-                  </div>
-                )}
-                <div className="detail-row">
-                  <span className="detail-label">Schedule:</span>
-                  <span className="detail-value schedule-value">{trigger.details.cronExpression}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Timezone:</span>
-                  <span className="detail-value">{trigger.details.timezone}</span>
-                </div>
-                {trigger.details.tags && trigger.details.tags.length > 0 && (
-                  <div className="detail-row detail-row-full">
-                    <span className="detail-label">Tags:</span>
-                    <div className="tags-container">
-                      {trigger.details.tags.map((tag, tagIndex) => (
-                        <span key={tagIndex} className="tag-badge">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-            
-            {type === 'webhook' && (
-              <>
-                <div className="detail-row">
-                  <span className="detail-label">URL:</span>
-                  <span className="detail-value webhook-url">{trigger.details.webhookUrl}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Method:</span>
-                  <span className="detail-value">{trigger.details.httpMethod}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Authentication:</span>
-                  <span className={`detail-value ${trigger.details.hasAuth ? 'auth-enabled' : 'auth-disabled'}`}>
-                    {trigger.details.hasAuth ? 'Enabled' : 'None'}
-                  </span>
-                </div>
-                {trigger.details.authentication && trigger.details.hasAuth && (
-                  <div className="detail-row">
-                    <span className="detail-label">Auth Type:</span>
-                    <span className="detail-value">{trigger.details.authentication}</span>
-                  </div>
-                )}
-              </>
-            )}
-            
-            {type === 'ai' && (
-              <>
-                <div className="ai-info-row">
-                  {trigger.details.agentName && (
-                    <div className="detail-row">
-                      <span className="detail-label">Agent:</span>
-                      <span className="detail-value">{trigger.details.agentName}</span>
-                    </div>
-                  )}
-                  <div className="detail-row">
-                    <span className="detail-label">Model:</span>
-                    <span className="detail-value">{String(trigger.details.model || 'Not specified')}</span>
-                  </div>
-                  {trigger.details.provider && trigger.details.provider !== 'Unknown' && (
-                    <div className="detail-row detail-row-provider">
-                      <span className="detail-label">Provider:</span>
-                      <span className="detail-value provider-with-logo">
-                        <ProviderLogo provider={String(trigger.details.provider)} size="medium" />
-                        <span className="provider-name">{String(trigger.details.provider)}</span>
-                      </span>
-                    </div>
-                  )}
-                </div>
+        </Badge>
+      </CardHeader>
 
-                {/* Tools this agent uses (from connected tool nodes in the workflow) */}
-                {trigger.details.connectedTools && trigger.details.connectedTools.length > 0 && (
-                  <div className="agent-tools">
-                    <span className="detail-label">Tools this agent uses:</span>
-                    <div className="agent-tool-pills">
-                      {trigger.details.connectedTools.map((t: ConnectedToolInfo, idx: number) => {
-                        const label = t.toolName || t.toolType
-                        const title = buildToolPillTitle(t)
-                        return (
-                          <span
-                            key={`${t.toolName}-${idx}`}
-                            className="agent-tool-pill"
-                            title={title || undefined}
-                          >
-                            {label}
-                          </span>
-                        )
-                      })}
-                    </div>
-                  </div>
+      <CardContent>
+        <div className="space-y-3">
+          {triggers.map((trigger, index) => (
+            <div key={`${trigger.nodeId}-${index}`}>
+              {index > 0 && <div className="h-px bg-slate-100 dark:bg-slate-800 my-3" />}
+              {triggers.length > 1 && (
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{trigger.nodeName}</p>
+              )}
+
+              <div className="space-y-1.5">
+                {type === 'cron' && (
+                  <>
+                    {trigger.details.description && (
+                      <DetailRow label="Description" full>
+                        <span className="text-slate-600 dark:text-slate-400">{trigger.details.description}</span>
+                      </DetailRow>
+                    )}
+                    <DetailRow label="Schedule">
+                      <code className="font-mono text-xs bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        {trigger.details.cronExpression}
+                      </code>
+                    </DetailRow>
+                    {trigger.details.timezone && (
+                      <DetailRow label="Timezone">
+                        <span className="text-slate-600 dark:text-slate-400">{trigger.details.timezone}</span>
+                      </DetailRow>
+                    )}
+                    {trigger.details.tags && trigger.details.tags.length > 0 && (
+                      <DetailRow label="Tags" full>
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {trigger.details.tags.map((tag, i) => (
+                            <Badge key={i} variant="outline">{tag}</Badge>
+                          ))}
+                        </div>
+                      </DetailRow>
+                    )}
+                  </>
                 )}
-                
-                {/* Editable prompt for AI agents */}
-                {trigger.details.prompt && (
-                  <EditablePrompt
-                    prompt={trigger.details.prompt}
-                    workflowId={trigger.workflowId}
-                    nodeId={trigger.nodeId}
-                    onSave={onPromptUpdate}
-                  />
+
+                {type === 'webhook' && (
+                  <>
+                    <DetailRow label="URL">
+                      <code className="font-mono text-xs bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 break-all">
+                        {trigger.details.webhookUrl}
+                      </code>
+                    </DetailRow>
+                    <DetailRow label="Method">
+                      <Badge variant="method">{trigger.details.httpMethod}</Badge>
+                    </DetailRow>
+                    <DetailRow label="Auth">
+                      <span className={cn(
+                        'text-sm',
+                        trigger.details.hasAuth
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-slate-400 dark:text-slate-500'
+                      )}>
+                        {trigger.details.hasAuth ? trigger.details.authentication || 'Enabled' : 'None'}
+                      </span>
+                    </DetailRow>
+                  </>
                 )}
-              </>
-            )}
-            
-            {type === 'tool' && (
-              <>
-                {trigger.details.toolName && (
-                  <div className="detail-row">
-                    <span className="detail-label">Tool Name:</span>
-                    <span className="detail-value">{trigger.details.toolName}</span>
-                  </div>
+
+                {type === 'ai' && (
+                  <>
+                    {trigger.details.agentName && (
+                      <DetailRow label="Agent">
+                        <span className="text-slate-700 dark:text-slate-300">{trigger.details.agentName}</span>
+                      </DetailRow>
+                    )}
+                    <DetailRow label="Model">
+                      <div className="flex items-center gap-1.5">
+                        {trigger.details.provider && trigger.details.provider !== 'Unknown' && (
+                          <ProviderLogo provider={String(trigger.details.provider)} size="medium" />
+                        )}
+                        <span className="text-slate-700 dark:text-slate-300">
+                          {String(trigger.details.model || 'Not specified')}
+                        </span>
+                      </div>
+                    </DetailRow>
+                    {trigger.details.connectedTools && trigger.details.connectedTools.length > 0 && (
+                      <DetailRow label="Tools" full>
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {trigger.details.connectedTools.map((t: ConnectedToolInfo, idx: number) => (
+                            <Badge
+                              key={`${t.toolName}-${idx}`}
+                              variant="secondary"
+                              className="cursor-default"
+                              title={buildToolPillTitle(t) || undefined}
+                            >
+                              {t.toolName || t.toolType}
+                            </Badge>
+                          ))}
+                        </div>
+                      </DetailRow>
+                    )}
+                    {trigger.details.prompt && (
+                      <div className="mt-2">
+                        <EditablePrompt
+                          prompt={trigger.details.prompt}
+                          workflowId={trigger.workflowId}
+                          nodeId={trigger.nodeId}
+                          onSave={onPromptUpdate}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
-                {trigger.details.toolType && (
-                  <div className="detail-row">
-                    <span className="detail-label">Tool Type:</span>
-                    <span className="detail-value">{String(trigger.details.toolType)}</span>
-                  </div>
+
+                {type === 'tool' && (
+                  <>
+                    {trigger.details.toolName && (
+                      <DetailRow label="Name">
+                        <span className="text-slate-700 dark:text-slate-300">{trigger.details.toolName}</span>
+                      </DetailRow>
+                    )}
+                    {trigger.details.toolType && (
+                      <DetailRow label="Type">
+                        <span className="text-slate-700 dark:text-slate-300">{String(trigger.details.toolType)}</span>
+                      </DetailRow>
+                    )}
+                    {trigger.details.toolDescription && (
+                      <DetailRow label="Description" full>
+                        <span className="text-slate-600 dark:text-slate-400">{trigger.details.toolDescription}</span>
+                      </DetailRow>
+                    )}
+                  </>
                 )}
-                {trigger.details.toolDescription && (
-                  <div className="detail-row detail-row-full">
-                    <span className="detail-label">Description:</span>
-                    <span className="detail-value prompt-text">{trigger.details.toolDescription}</span>
-                  </div>
+
+                {(type === 'manual' || type === 'other') && (
+                  <>
+                    {trigger.details.description && (
+                      <DetailRow label="Description" full>
+                        <span className="text-slate-600 dark:text-slate-400">{trigger.details.description}</span>
+                      </DetailRow>
+                    )}
+                    {trigger.details.tags && trigger.details.tags.length > 0 && (
+                      <DetailRow label="Tags" full>
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {trigger.details.tags.map((tag, i) => (
+                            <Badge key={i} variant="outline">{tag}</Badge>
+                          ))}
+                        </div>
+                      </DetailRow>
+                    )}
+                    {trigger.details.triggerType && (
+                      <DetailRow label="Type">
+                        <span className="text-slate-600 dark:text-slate-400">{formatTriggerType(trigger.details.triggerType)}</span>
+                      </DetailRow>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-            
-            {type === 'manual' && (
-              <>
-                {trigger.details.description && (
-                  <div className="detail-row detail-row-full">
-                    <span className="detail-label">Description:</span>
-                    <span className="detail-value description-text">{trigger.details.description}</span>
-                  </div>
-                )}
-                {trigger.details.tags && trigger.details.tags.length > 0 && (
-                  <div className="detail-row detail-row-full">
-                    <span className="detail-label">Tags:</span>
-                    <div className="tags-container">
-                      {trigger.details.tags.map((tag, tagIndex) => (
-                        <span key={tagIndex} className="tag-badge">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {trigger.details.triggerType && (
-                  <div className="detail-row">
-                    <span className="detail-label">Type:</span>
-                    <span className="detail-value">{formatTriggerType(trigger.details.triggerType)}</span>
-                  </div>
-                )}
-              </>
-            )}
-            
-            {type === 'other' && trigger.details.triggerType && (
-              <div className="detail-row">
-                <span className="detail-label">Type:</span>
-                <span className="detail-value">{formatTriggerType(trigger.details.triggerType)}</span>
               </div>
-            )}
-          </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
