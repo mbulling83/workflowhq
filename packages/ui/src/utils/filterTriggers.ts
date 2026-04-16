@@ -1,5 +1,5 @@
-import { TriggerInfo } from '../types'
-import { FilterState } from '../components/FilterBar'
+import type { TriggerInfo } from '../types'
+import type { FilterState } from '../components/FilterBar'
 import { getTriggerTypeCategory } from './formatTriggerType'
 
 export function filterTriggers(triggers: TriggerInfo[], filters: FilterState): TriggerInfo[] {

@@ -1,4 +1,4 @@
-import { Workflow, Node, TriggerInfo, TriggerDetails, ConnectedToolInfo } from '../types'
+import type { Workflow, Node, TriggerInfo, TriggerDetails, ConnectedToolInfo } from '../types'
 
 const N8N_URL = import.meta.env.VITE_N8N_URL || ''
 

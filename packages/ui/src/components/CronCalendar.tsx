@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { TriggerInfo } from '../types'
-import { getScheduledEvents, groupEventsByDate, formatDateKey, formatTime, ScheduledEvent } from '../utils/cronScheduler'
+import type { TriggerInfo } from '../types'
+import { getScheduledEvents, groupEventsByDate, formatDateKey, formatTime, type ScheduledEvent } from '../utils/cronScheduler'
 import './CronCalendar.css'
 
 interface CronCalendarProps {

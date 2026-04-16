@@ -1,8 +1,9 @@
-import { TriggerInfo, ConnectedToolInfo } from '../types'
+import type { TriggerInfo, ConnectedToolInfo } from '../types'
 import ProviderLogo from './ProviderLogo'
 import EditablePrompt from './EditablePrompt'
 import { formatTriggerType } from '../utils/formatTriggerType'
 import { cn } from '../lib/utils'
+import type { ReactNode } from 'react'
 import { Badge } from './ui/badge'
 import { Card, CardHeader, CardContent } from './ui/card'
 
@@ -23,7 +24,7 @@ function buildToolPillTitle(t: ConnectedToolInfo): string {
   return parts.join('\n\n')
 }
 
-function DetailRow({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+function DetailRow({ label, children, full }: { label: string; children: ReactNode; full?: boolean }) {
   return (
     <div className={cn('flex gap-2', full ? 'flex-col' : 'flex-row items-start')}>
       <span className="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0 w-20">{label}</span>

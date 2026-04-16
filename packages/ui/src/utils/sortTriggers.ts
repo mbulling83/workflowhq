@@ -1,5 +1,5 @@
-import { TriggerInfo } from '../types'
-import { SortBy, SortOrder } from '../components/SortBar'
+import type { TriggerInfo } from '../types'
+import type { SortBy, SortOrder } from '../components/SortBar'
 
 export function sortTriggers(
   triggers: TriggerInfo[],

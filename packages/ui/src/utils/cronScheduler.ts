@@ -1,4 +1,4 @@
-import { TriggerInfo } from '../types'
+import type { TriggerInfo } from '../types'
 
 export interface ScheduledEvent {
   trigger: TriggerInfo

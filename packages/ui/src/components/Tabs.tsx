@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { cn } from '../lib/utils'
 
 interface Tab {
@@ -9,7 +10,7 @@ interface Tab {
 
 interface TabsProps {
   tabs: Tab[]
-  children: (activeTab: string) => React.ReactNode
+  children: (activeTab: string) => ReactNode
   onTabChange?: (tabId: string) => void
 }
 

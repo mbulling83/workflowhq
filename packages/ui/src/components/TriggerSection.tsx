@@ -1,6 +1,6 @@
-import { TriggerInfo } from '../types'
+import type { TriggerInfo } from '../types'
 import TriggerItem from './TriggerItem'
-import { LayoutType } from './LayoutSelector'
+import type { LayoutType } from './LayoutSelector'
 
 interface TriggerSectionProps {
   title: string

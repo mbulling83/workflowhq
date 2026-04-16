@@ -1,4 +1,4 @@
-import { TriggerInfo } from '../types'
+import type { TriggerInfo } from '../types'
 import { getTriggerTypeCategory } from '../utils/formatTriggerType'
 import { cn } from '../lib/utils'
 
