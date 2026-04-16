@@ -1,0 +1,9 @@
+{
+  "name": "n8n-manager-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "n8n-manager",
+    "n8n-manager-cloud"
+  ]
+}
