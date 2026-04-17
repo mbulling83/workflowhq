@@ -1,7 +1,6 @@
 // src/hooks/useConnection.ts
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { useAuth } from './useAuth'
+import { authClient } from '../lib/auth'
 
 export interface Connection {
   id: string
@@ -10,23 +9,23 @@ export interface Connection {
 }
 
 export function useConnection() {
-  const { user } = useAuth()
   const [connection, setConnection] = useState<Connection | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!user) return
+  const fetchConnection = async () => {
+    const { data: session } = await authClient.getSession()
+    if (!session) { setLoading(false); return }
 
-    supabase
-      .from('user_connections')
-      .select('id, n8n_url, verified')
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        setConnection(data)
-        setLoading(false)
-      })
-  }, [user])
+    const res = await fetch('/api/connection', {
+      headers: { Authorization: `Bearer ${session.session.token}` },
+    })
+    if (res.ok) {
+      setConnection(await res.json())
+    }
+    setLoading(false)
+  }
 
-  return { connection, loading, refetch: () => setLoading(true) }
+  useEffect(() => { fetchConnection() }, [])
+
+  return { connection, loading, refetch: fetchConnection }
 }
