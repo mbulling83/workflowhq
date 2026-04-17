@@ -11,10 +11,10 @@ export function LandingPage() {
       </p>
       <div className="flex gap-3">
         <Button asChild>
-          <Link to="/signup">Get started</Link>
+          <Link to="/auth/sign-up">Get started</Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link to="/signin">Sign in</Link>
+          <Link to="/auth/sign-in">Sign in</Link>
         </Button>
       </div>
     </div>
