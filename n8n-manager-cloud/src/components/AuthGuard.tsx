@@ -19,7 +19,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!user) {
-    return <Navigate to="/signin" state={{ from: location }} replace />
+    return <Navigate to="/auth/sign-in" state={{ from: location }} replace />
   }
 
   return <>{children}</>
