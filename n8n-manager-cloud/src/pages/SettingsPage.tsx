@@ -1,7 +1,7 @@
 // src/pages/SettingsPage.tsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { authClient } from '../lib/auth'
 import { verifyConnection } from '../services/n8nProxy'
 import { useAuth } from '../hooks/useAuth'
 import { useConnection } from '../hooks/useConnection'
@@ -46,17 +46,28 @@ export function SettingsPage() {
   }
 
   const handleSaveConnection = async () => {
-    if (!user) return
     setSavingConnection(true)
     try {
-      const secretName = `user_${user.id}_n8n_key`
-      await supabase.rpc('vault_create_or_update_secret', { secret: newKey, name: secretName })
-      await supabase.from('user_connections').upsert({
-        user_id: user.id,
-        n8n_url: newUrl || connection?.n8n_url,
-        api_key_secret: secretName,
-        verified: true,
+      const { data: session } = await authClient.getSession()
+      if (!session) throw new Error('Not authenticated')
+
+      const res = await fetch('/api/connection', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.session.token}`,
+        },
+        body: JSON.stringify({
+          n8nUrl: newUrl || connection?.n8n_url,
+          apiKey: newKey,
+        }),
       })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to save')
+      }
+
       setEditingConnection(false)
       setNewUrl('')
       setNewKey('')
@@ -69,16 +80,15 @@ export function SettingsPage() {
   }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    navigate('/signin')
+    await authClient.signOut()
+    navigate('/')
   }
 
   const handleDeleteAccount = async () => {
     if (deleteConfirm !== user?.email) return
     setDeletingAccount(true)
-    // Deleting the auth user cascades to user_connections via FK
-    await supabase.auth.admin?.deleteUser(user!.id)
-    await supabase.auth.signOut()
+    // TODO: call a DELETE /api/account route when implemented
+    await authClient.signOut()
     navigate('/')
   }
 
