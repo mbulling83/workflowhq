@@ -25,7 +25,9 @@
     /* Path mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@n8n/ui": ["./src/ui/index.ts"],
+      "@n8n/ui/*": ["./src/ui/*"]
     }
   },
   "include": ["src"]
