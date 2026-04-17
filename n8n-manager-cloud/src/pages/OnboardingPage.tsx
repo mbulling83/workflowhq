@@ -1,9 +1,8 @@
 // src/pages/OnboardingPage.tsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { authClient } from '../lib/auth'
 import { verifyConnection } from '../services/n8nProxy'
-import { useAuth } from '../hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +14,6 @@ type TestState = 'idle' | 'testing' | 'success' | 'error'
 
 export function OnboardingPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
 
   const [step, setStep] = useState<Step>('url')
   const [n8nUrl, setN8nUrl] = useState('')
@@ -47,32 +45,24 @@ export function OnboardingPage() {
   }
 
   const handleSaveAndContinue = async () => {
-    if (!user) return
     setSaving(true)
-
     try {
-      // Store API key in Vault, get back the secret name
-      const secretName = `user_${user.id}_n8n_key`
+      const { data: session } = await authClient.getSession()
+      if (!session) throw new Error('Not authenticated')
 
-      // Insert or update the Vault secret
-      const { error: vaultError } = await supabase.rpc('vault_create_or_update_secret', {
-        secret: apiKey,
-        name: secretName,
+      const res = await fetch('/api/connection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.session.token}`,
+        },
+        body: JSON.stringify({ n8nUrl, apiKey }),
       })
 
-      if (vaultError) throw vaultError
-
-      // Upsert the connection row (unique on user_id)
-      const { error: upsertError } = await supabase
-        .from('user_connections')
-        .upsert({
-          user_id: user.id,
-          n8n_url: n8nUrl,
-          api_key_secret: secretName,
-          verified: true,
-        })
-
-      if (upsertError) throw upsertError
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to save credentials')
+      }
 
       navigate('/app')
     } catch (err) {
