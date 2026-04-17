@@ -1,22 +1,19 @@
 // src/services/n8nProxy.ts
-import { supabase } from '../lib/supabase'
+import { authClient } from '../lib/auth'
 import type { Workflow } from '@n8n/ui'
 
-const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/n8n-proxy`
-
 async function callProxy(body: Record<string, unknown>): Promise<Response> {
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: session } = await authClient.getSession()
   if (!session) throw new Error('Not authenticated')
 
-  const response = await fetch(FUNCTION_URL, {
+  const response = await fetch('/api/n8n-proxy', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
+      Authorization: `Bearer ${session.session.token}`,
     },
     body: JSON.stringify(body),
   })
-
   return response
 }
 
