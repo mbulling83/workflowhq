@@ -1,6 +1,6 @@
 // src/components/TopNav.tsx
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { authClient } from '../lib/auth'
 import { Button } from '@/components/ui/button'
 
 interface TopNavProps {
@@ -11,8 +11,8 @@ export function TopNav({ workflowCount }: TopNavProps) {
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    navigate('/signin')
+    await authClient.signOut()
+    navigate('/')
   }
 
   return (
