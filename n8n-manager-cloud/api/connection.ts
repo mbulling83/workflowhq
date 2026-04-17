@@ -1,8 +1,8 @@
 // api/connection.ts
 import { Pool } from 'pg'
 import { attachDatabasePool } from '@vercel/functions'
-import { encrypt } from '../lib/encryption'
-import { getSessionUser } from '../lib/auth-helpers'
+import { encrypt } from '../lib/encryption.js'
+import { getSessionUser } from '../lib/auth-helpers.js'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 attachDatabasePool(pool)

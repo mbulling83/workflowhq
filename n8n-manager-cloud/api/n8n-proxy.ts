@@ -1,8 +1,8 @@
 // api/n8n-proxy.ts
 import { Pool } from 'pg'
 import { attachDatabasePool } from '@vercel/functions'
-import { decrypt } from '../lib/encryption'
-import { getSessionUser } from '../lib/auth-helpers'
+import { decrypt } from '../lib/encryption.js'
+import { getSessionUser } from '../lib/auth-helpers.js'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 attachDatabasePool(pool)
