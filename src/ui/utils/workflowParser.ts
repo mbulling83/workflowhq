@@ -2,6 +2,59 @@ import type { Workflow, Node, TriggerInfo, TriggerDetails, ConnectedToolInfo } f
 
 const N8N_URL = process.env.NEXT_PUBLIC_N8N_URL || process.env.VITE_N8N_URL || ''
 
+/**
+ * Safely extract a model ID string from an n8n model parameter.
+ * n8n uses several formats: plain string, __rl resource-locator object,
+ * {value: string}, {cachedResult: {value}}, etc.
+ * Returns null if nothing usable is found.
+ */
+function extractModelString(param: unknown): string | null {
+  if (!param) return null
+
+  if (typeof param === 'string') {
+    const v = param.startsWith('=') ? param.slice(1) : param
+    return v.trim() || null
+  }
+
+  if (typeof param !== 'object' || param === null) return null
+
+  const p = param as Record<string, unknown>
+
+  // __rl (resource locator) or plain {value} format
+  if (p.value !== undefined) {
+    const v = p.value
+    if (typeof v === 'string') return (v.startsWith('=') ? v.slice(1) : v).trim() || null
+    if (typeof v === 'object' && v !== null) {
+      const vObj = v as Record<string, unknown>
+      const inner = String(vObj.name || vObj.id || vObj.value || '').trim()
+      return inner || null
+    }
+  }
+
+  // cachedResult format
+  if (p.cachedResult) {
+    const cr = p.cachedResult as Record<string, unknown>
+    const v = cr.value
+    if (typeof v === 'string') return (v.startsWith('=') ? v.slice(1) : v).trim() || null
+    if (typeof v === 'object' && v !== null) {
+      const vObj = v as Record<string, unknown>
+      const inner = String(vObj.name || vObj.id || '').trim()
+      return inner || null
+    }
+  }
+
+  // Last resort: any plain string value in the object (skip structural keys)
+  const skipKeys = new Set(['__rl', 'mode', 'cachedResultUrl', 'cachedResultName', 'cachedResultId'])
+  for (const [key, val] of Object.entries(p)) {
+    if (!skipKeys.has(key) && typeof val === 'string' && val.trim()) {
+      const v = val.trim()
+      return v.startsWith('=') ? v.slice(1).trim() || null : v
+    }
+  }
+
+  return null
+}
+
 export function parseWorkflows(workflows: Workflow[], baseUrl?: string): TriggerInfo[] {
   const triggers: TriggerInfo[] = []
 
@@ -895,37 +948,10 @@ function parseAIAgent(agentNode: Node, workflow: Workflow): TriggerInfo | null {
               if (targetNodeId && (targetNodeId === agentNode.id || targetNodeId === agentNode.name)) {
                 // Found a model node connected to our agent/chain
                 if (!model) { // Only set if we haven't found one yet
-                  // Extract model name - handle various formats
-                  const modelParam = sourceNode.parameters.model
-                  if (typeof modelParam === 'object' && modelParam !== null) {
-                    // Handle __rl format (resource locator)
-                    if (modelParam.__rl && modelParam.value) {
-                      model = String(modelParam.value)
-                    } else if (modelParam.value) {
-                      model = String(modelParam.value)
-                    } else if (modelParam.mode === 'list' && modelParam.value) {
-                      model = String(modelParam.value)
-                    } else if (modelParam.cachedResult && modelParam.cachedResult.value) {
-                      // Handle cached result format
-                      model = String(modelParam.cachedResult.value)
-                    } else {
-                      // Try to find any string value in the object
-                      const stringValues = Object.values(modelParam).filter(v => typeof v === 'string' && v.length > 0)
-                      if (stringValues.length > 0) {
-                        model = String(stringValues[0])
-                      }
-                    }
-                  } else if (typeof modelParam === 'string') {
-                    model = modelParam
-                  } else {
-                    // Try alternative parameter names
-                    const fallbackModel = sourceNode.parameters.modelName || 
-                                         sourceNode.parameters.modelId ||
-                                         sourceNode.parameters.name
-                    model = fallbackModel ? String(fallbackModel) : 'Not specified'
-                  }
-                  
-                  // Extract provider from model node type
+                  model = extractModelString(sourceNode.parameters.model)
+                        ?? extractModelString(sourceNode.parameters.modelName)
+                        ?? extractModelString(sourceNode.parameters.modelId)
+                        ?? null
                   provider = extractProvider(sourceNode.type)
                 }
               }
@@ -968,30 +994,10 @@ function parseAIAgent(agentNode: Node, workflow: Workflow): TriggerInfo | null {
                                      targetNode.type.includes('ai_languageModel')
                   
                   if (isModelNode && !model) {
-                    // Extract model from target node
-                    const modelParam = targetNode.parameters.model
-                    if (typeof modelParam === 'object' && modelParam !== null) {
-                      if (modelParam.__rl && modelParam.value) {
-                        model = String(modelParam.value)
-                      } else if (modelParam.value) {
-                        model = String(modelParam.value)
-                      } else if (modelParam.cachedResult && modelParam.cachedResult.value) {
-                        model = String(modelParam.cachedResult.value)
-                      } else {
-                        const stringValues = Object.values(modelParam).filter(v => typeof v === 'string' && v.length > 0)
-                        if (stringValues.length > 0) {
-                          model = String(stringValues[0])
-                        }
-                      }
-                    } else if (typeof modelParam === 'string') {
-                      model = modelParam
-                    } else {
-                      const fallbackModel = targetNode.parameters.modelName || 
-                                           targetNode.parameters.modelId ||
-                                           targetNode.parameters.name
-                      model = fallbackModel ? String(fallbackModel) : 'Not specified'
-                    }
-                    
+                    model = extractModelString(targetNode.parameters.model)
+                          ?? extractModelString(targetNode.parameters.modelName)
+                          ?? extractModelString(targetNode.parameters.modelId)
+                          ?? null
                     provider = extractProvider(targetNode.type)
                   }
                 }
@@ -1003,51 +1009,20 @@ function parseAIAgent(agentNode: Node, workflow: Workflow): TriggerInfo | null {
     }
   }
   
-  // Fallback: check if model info is directly in agent parameters
-  if (!model || model === 'Not specified') {
-    const agentModelParam = agentNode.parameters.model
-    if (agentModelParam) {
-      if (typeof agentModelParam === 'object' && agentModelParam !== null) {
-        if (agentModelParam.__rl && agentModelParam.value) {
-          model = String(agentModelParam.value)
-        } else if (agentModelParam.value) {
-          model = String(agentModelParam.value)
-        } else if (agentModelParam.cachedResult && agentModelParam.cachedResult.value) {
-          model = String(agentModelParam.cachedResult.value)
-        } else {
-          const stringValues = Object.values(agentModelParam).filter(v => typeof v === 'string' && v.length > 0)
-          if (stringValues.length > 0) {
-            model = String(stringValues[0])
-          }
-        }
-      } else if (typeof agentModelParam === 'string') {
-        model = agentModelParam
-      }
-    }
-    
-    if (!model || model === 'Not specified') {
-      const fallbackModel = agentNode.parameters.modelName || 
-                           agentNode.parameters.modelId ||
-                           agentNode.parameters.name
-      model = fallbackModel ? String(fallbackModel) : 'Not specified'
-    }
-  }
-  
-  // Ensure model is always a string
-  if (typeof model !== 'string') {
-    model = String(model || 'Not specified')
+  // Fallback: check if model info is directly in agent parameters (some node types embed it)
+  if (!model) {
+    model = extractModelString(agentNode.parameters.model)
+          ?? extractModelString(agentNode.parameters.modelName)
+          ?? extractModelString(agentNode.parameters.modelId)
+          ?? null
+    // Note: agentNode.parameters.name is the node's display name, never a model ID
   }
   
   if (provider === 'Unknown') {
     provider = extractProvider(agentNode.type)
   }
   
-  // Ensure provider is always a string
-  if (typeof provider !== 'string') {
-    provider = String(provider || 'Unknown')
-  }
-  
-  details.model = model
+  details.model = model ?? undefined
   details.provider = provider
 
   // Attach tools connected to this agent (for pills and filter-by-tool)

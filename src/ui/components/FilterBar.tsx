@@ -2,19 +2,27 @@ import type { TriggerInfo } from '../types'
 import { getTriggerTypeCategory } from '../utils/formatTriggerType'
 import { cn } from '../lib/utils'
 
-const MODEL_IDENTIFIER_PATTERN = /\b(gpt|claude|gemini|llama|mistral|qwen|deepseek|mixtral|command|sonar|text-embedding|embedding|phi|o[1-9])\b/i
-const TOOL_IDENTIFIER_PATTERN = /\b(tool|http|request|weather|calendar|function|vector|database|sql|search|scrape|fetch|get|send|read|write|api)\b/i
-const TOOL_ACTION_PATTERN = /^(get|fetch|search|send|read|write|create|update|delete)\b/i
+// Positive whitelist: values that are definitely model IDs
+const KNOWN_MODEL_PATTERN = /^(gpt[-/]|claude[-/]|gemini[-/]|llama[-/]|mistral|mistralai\/|qwen[-/]|deepseek|mixtral|command[-/r]|sonar|text-embedding|embedding-|phi[-/]|o[1-9][-/]|anthropic\/|google\/|openai\/|glm-)/i
 
 function normalizeValue(value: string): string {
   return value.trim().toLowerCase()
 }
 
+function isKnownModel(value: string): boolean {
+  return KNOWN_MODEL_PATTERN.test(value.trim())
+}
+
 function isLikelyToolIdentifier(value: string): boolean {
   const cleaned = value.trim()
   if (!cleaned) return false
-  if (MODEL_IDENTIFIER_PATTERN.test(cleaned)) return false
-  return TOOL_IDENTIFIER_PATTERN.test(cleaned) || TOOL_ACTION_PATTERN.test(cleaned)
+  // Anything that looks like a snake_case function name or CamelCase workflow name
+  // is almost certainly a tool, not a model
+  if (/_tool$|_fn$|Workflow$/.test(cleaned)) return true
+  if (/^[A-Z][a-z]+[A-Z]/.test(cleaned)) return true  // CamelCase like FlightSearch
+  if (/^[a-z]+[A-Z]/.test(cleaned)) return true        // camelCase like addWorkflow
+  const TOOL_IDENTIFIER_PATTERN = /\b(tool|http|request|calendar|function|vector|database|sql|scrape|api)\b/i
+  return TOOL_IDENTIFIER_PATTERN.test(cleaned)
 }
 
 function toSortedUniqueValues(values: string[]): string[] {
@@ -106,11 +114,14 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
         return
       }
 
-      if (knownToolIdentifiers.has(normalizeValue(modelValue)) || isLikelyToolIdentifier(modelValue)) {
+      if (knownToolIdentifiers.has(normalizeValue(modelValue))) {
         toolCandidates.push(modelValue)
-      } else {
+      } else if (isKnownModel(modelValue)) {
         modelCandidates.push(modelValue)
+      } else if (isLikelyToolIdentifier(modelValue)) {
+        toolCandidates.push(modelValue)
       }
+      // else: unrecognised value — silently drop (don't pollute either dropdown)
     })
   }
 

@@ -3,7 +3,10 @@ import { useRouter } from 'next/navigation'
 import { WorkflowList } from '@n8n/ui'
 import type { Workflow } from '@n8n/ui'
 import { fetchWorkflows, updateWorkflow, NoConnectionError } from '../services/n8nProxy'
+import { useConnection } from '../hooks/useConnection'
 import { TopNav } from '../components/TopNav'
+import { Sheet } from '@/components/ui/sheet'
+import { SettingsScreen } from './SettingsScreen'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 
@@ -17,10 +20,12 @@ const LOADING_MESSAGES = [
 
 export function DashboardScreen() {
   const router = useRouter()
+  const { connection } = useConnection()
   const [workflows, setWorkflows] = useState<Workflow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [msgIndex, setMsgIndex] = useState(0)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   useEffect(() => {
     if (!loading) return
@@ -52,7 +57,7 @@ export function DashboardScreen() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <TopNav />
+        <TopNav onSettingsClick={() => setSettingsOpen(true)} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-3">
             <div className="flex gap-1 justify-center">
@@ -70,7 +75,7 @@ export function DashboardScreen() {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col">
-        <TopNav />
+        <TopNav onSettingsClick={() => setSettingsOpen(true)} />
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-md space-y-4">
             <Alert variant="destructive">
@@ -78,7 +83,7 @@ export function DashboardScreen() {
             </Alert>
             <div className="flex gap-2">
               <Button onClick={loadWorkflows} className="flex-1">Retry</Button>
-              <Button variant="outline" onClick={() => router.push('/settings')}>
+              <Button variant="outline" onClick={() => setSettingsOpen(true)}>
                 Update credentials
               </Button>
             </div>
@@ -90,10 +95,13 @@ export function DashboardScreen() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <TopNav workflowCount={workflows.length} />
+      <TopNav workflowCount={workflows.length} onSettingsClick={() => setSettingsOpen(true)} />
       <main className="flex-1 p-6">
-        <WorkflowList workflows={workflows} onWorkflowUpdate={loadWorkflows} updateWorkflow={updateWorkflow} />
+        <WorkflowList workflows={workflows} onWorkflowUpdate={loadWorkflows} updateWorkflow={updateWorkflow} n8nBaseUrl={connection?.n8n_url} />
       </main>
+      <Sheet open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+        <SettingsScreen onClose={() => setSettingsOpen(false)} />
+      </Sheet>
     </div>
   )
 }

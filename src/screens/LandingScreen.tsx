@@ -4,6 +4,17 @@ import './LandingPage.css'
 export function LandingScreen() {
   return (
     <div className="landing-page">
+      {/* Top Nav */}
+      <nav className="landing-nav">
+        <div className="landing-nav-inner">
+          <Link href="/" className="landing-nav-logo">WorkflowHQ</Link>
+          <div className="landing-nav-actions">
+            <Link href="/auth/sign-in" className="landing-nav-link">Sign in</Link>
+            <Link href="/auth/sign-up" className="landing-nav-cta">Get started</Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
@@ -23,11 +34,11 @@ export function LandingScreen() {
           </p>
 
           <div className="hero-cta-group">
-            <Link href="/signup" className="hero-cta-button">
+            <Link href="/auth/sign-up" className="hero-cta-button">
               Get Started — Free
               <span className="button-arrow">→</span>
             </Link>
-            <Link href="/signin" className="hero-demo-button">
+            <Link href="/auth/sign-in" className="hero-demo-button">
               Sign In
               <span className="button-arrow">→</span>
             </Link>
@@ -330,7 +341,7 @@ export function LandingScreen() {
                 <li>Webhook URL quick access</li>
                 <li>AI agent dashboard</li>
               </ul>
-              <Link href="/signup" className="pricing-button pricing-button-secondary">
+              <Link href="/auth/sign-up" className="pricing-button pricing-button-secondary">
                 Start Free
               </Link>
             </article>
@@ -351,7 +362,7 @@ export function LandingScreen() {
                 <li>All AI features included</li>
                 <li>Priority support</li>
               </ul>
-              <Link href="/signup" className="pricing-button pricing-button-primary">
+              <Link href="/auth/sign-up" className="pricing-button pricing-button-primary">
                 Upgrade to In-Cloud
               </Link>
             </article>
@@ -366,7 +377,7 @@ export function LandingScreen() {
           <p className="cta-description">
             Start for free, or choose in-cloud for editing, bulk edits, and all AI features.
           </p>
-          <Link href="/signup" className="cta-button">
+          <Link href="/auth/sign-up" className="cta-button">
             Get Started
             <span className="button-arrow">→</span>
           </Link>
@@ -382,8 +393,8 @@ export function LandingScreen() {
             <p className="footer-tagline">Manage your N8N workflows at a glance</p>
           </div>
           <div className="footer-links">
-            <Link href="/signin" className="footer-link">Sign In</Link>
-            <Link href="/signup" className="footer-link">Sign Up</Link>
+            <Link href="/auth/sign-in" className="footer-link">Sign In</Link>
+            <Link href="/auth/sign-up" className="footer-link">Sign Up</Link>
           </div>
         </div>
         <div className="footer-bottom">

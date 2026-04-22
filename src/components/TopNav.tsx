@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button'
 
 interface TopNavProps {
   workflowCount?: number
+  onSettingsClick?: () => void
 }
 
-export function TopNav({ workflowCount }: TopNavProps) {
+export function TopNav({ workflowCount, onSettingsClick }: TopNavProps) {
   const router = useRouter()
 
   const handleSignOut = async () => {
@@ -31,8 +32,8 @@ export function TopNav({ workflowCount }: TopNavProps) {
         )}
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/settings">Settings</Link>
+        <Button variant="ghost" size="sm" onClick={onSettingsClick}>
+          Settings
         </Button>
         <Button variant="ghost" size="sm" onClick={handleSignOut}>
           Sign out

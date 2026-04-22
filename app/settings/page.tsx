@@ -1,15 +1,5 @@
-'use client'
-
-import { AuthGuard } from '@/components/AuthGuard'
-import { AppProviders } from '@/components/AppProviders'
-import { SettingsScreen } from '@/screens/SettingsScreen'
+import { redirect } from 'next/navigation'
 
 export default function SettingsRoute() {
-  return (
-    <AppProviders>
-      <AuthGuard>
-        <SettingsScreen />
-      </AuthGuard>
-    </AppProviders>
-  )
+  redirect('/app')
 }

@@ -57,21 +57,20 @@ function TriggerItem({ triggers, type, onPromptUpdate, n8nBaseUrl }: TriggerItem
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-50 truncate">
-            {workflow.workflowName}
-          </h3>
-          {workflowUrl && (
+          {workflowUrl ? (
             <a
               href={workflowUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shrink-0 transition-colors"
-              title={`Open in n8n`}
+              className="font-semibold text-sm text-slate-900 dark:text-slate-50 truncate hover:underline underline-offset-2"
+              title="Open in n8n"
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M3.5 1H11M11 1V8.5M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              {workflow.workflowName}
             </a>
+          ) : (
+            <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-50 truncate">
+              {workflow.workflowName}
+            </h3>
           )}
           {triggers.length > 1 && (
             <Badge variant="secondary">{triggers.length} triggers</Badge>

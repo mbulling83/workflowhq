@@ -5,7 +5,6 @@ import { readApiError } from '../lib/readApiError'
 import { verifyConnection } from '../services/n8nProxy'
 import { useAuth } from '../hooks/useAuth'
 import { useConnection } from '../hooks/useConnection'
-import { TopNav } from '../components/TopNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,7 +15,11 @@ import { Badge } from '@/components/ui/badge'
 
 type TestState = 'idle' | 'testing' | 'success' | 'error'
 
-export function SettingsScreen() {
+interface SettingsScreenProps {
+  onClose?: () => void
+}
+
+export function SettingsScreen({ onClose }: SettingsScreenProps = {}) {
   const router = useRouter()
   const { user } = useAuth()
   const { connection, loading: connectionLoading } = useConnection()
@@ -79,10 +82,22 @@ export function SettingsScreen() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <TopNav />
-      <main className="flex-1 max-w-2xl mx-auto w-full p-6 space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h2 className="text-lg font-semibold text-slate-900">Settings</h2>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label="Close settings"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+        )}
+      </div>
+      <main className="flex-1 p-6 space-y-6 overflow-y-auto">
         <Card>
           <CardHeader>
             <CardTitle>n8n Connection</CardTitle>
