@@ -29,7 +29,7 @@ export function Sheet({ open, onClose, children }: SheetProps) {
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[2px] transition-opacity duration-300',
+          'fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[2px] transition-opacity duration-200 ease-out',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
         onClick={onClose}
@@ -38,7 +38,7 @@ export function Sheet({ open, onClose, children }: SheetProps) {
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto border-l border-slate-200/90 bg-slate-50/95 shadow-[0_24px_64px_rgba(15,23,42,0.18)] backdrop-blur-md will-change-transform transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+          'fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto border-l border-slate-200/90 bg-slate-50/95 shadow-[0_24px_64px_rgba(15,23,42,0.18)] backdrop-blur-md will-change-transform transition-[transform,opacity] duration-260 ease-[cubic-bezier(0.2,0.8,0.2,1)]',
           open ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-90'
         )}
         role="dialog"

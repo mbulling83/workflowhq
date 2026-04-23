@@ -41,6 +41,7 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
   const [publishingAnnouncement, setPublishingAnnouncement] = useState(false)
   const [announcementFeedback, setAnnouncementFeedback] = useState<string | null>(null)
   const [announcementError, setAnnouncementError] = useState<string | null>(null)
+  const softInputClassName = 'border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 focus-visible:border-slate-300 focus-visible:ring-slate-300'
 
   const handleTestConnection = async () => {
     setTestState('testing')
@@ -125,7 +126,7 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
         {onClose && (
           <button
             onClick={onClose}
-            className="min-h-10 min-w-10 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1"
+            className="min-h-10 min-w-10 rounded-lg p-1 text-slate-400 transition-[background-color,color,box-shadow,transform] duration-150 ease-out hover:bg-slate-100 hover:text-slate-600 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1"
             aria-label="Close settings"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -134,16 +135,16 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
           </button>
         )}
       </div>
-      <main className="flex-1 space-y-5 overflow-y-auto bg-gradient-to-b from-slate-50 to-slate-100/40 p-5">
-        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <CardHeader className="pb-4">
+      <main className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-50 to-slate-100/40 p-4">
+        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-[box-shadow,border-color,transform] duration-200 ease-out hover:-translate-y-px hover:border-slate-300 hover:shadow-md">
+          <CardHeader className="space-y-1 p-5 pb-3">
             <CardTitle className="text-base font-semibold tracking-tight">n8n Connection</CardTitle>
             <CardDescription>Your connected n8n instance</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 p-5 pt-0">
             {!connectionLoading && connection && !editingConnection && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
+              <div className="space-y-2.5">
+                <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-medium text-slate-700">{connection.n8n_url}</p>
                     <p className="text-xs text-slate-500">API Key: ••••••••</p>
@@ -152,28 +153,64 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
                     {connection.verified ? 'Connected' : 'Unverified'}
                   </Badge>
                 </div>
-                <Button variant="outline" size="sm" className="min-h-10" onClick={() => setEditingConnection(true)}>Update credentials</Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="min-h-10 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  onClick={() => setEditingConnection(true)}
+                >
+                  Update credentials
+                </Button>
               </div>
             )}
             {editingConnection && (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <div className="space-y-1">
                   <Label>n8n URL</Label>
-                  <Input type="url" placeholder={connection?.n8n_url ?? 'https://my-n8n.example.com'} value={newUrl} onChange={(e) => { setNewUrl(e.target.value); setTestState('idle') }} />
+                  <Input
+                    type="url"
+                    className={softInputClassName}
+                    placeholder={connection?.n8n_url ?? 'https://my-n8n.example.com'}
+                    value={newUrl}
+                    onChange={(e) => { setNewUrl(e.target.value); setTestState('idle') }}
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label>New API Key</Label>
-                  <Input type="password" placeholder="n8n_api_..." value={newKey} onChange={(e) => { setNewKey(e.target.value); setTestState('idle') }} />
+                  <Input
+                    type="password"
+                    className={softInputClassName}
+                    placeholder="n8n_api_..."
+                    value={newKey}
+                    onChange={(e) => { setNewKey(e.target.value); setTestState('idle') }}
+                  />
                 </div>
                 {testState === 'error' && testError && (
-                  <Alert variant="destructive"><AlertDescription>{testError}</AlertDescription></Alert>
+                  <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+                    <AlertDescription>{testError}</AlertDescription>
+                  </Alert>
                 )}
                 {testState === 'success' && (
-                  <Alert><AlertDescription>Connected successfully!</AlertDescription></Alert>
+                  <Alert className="border-emerald-200 bg-emerald-50 text-emerald-800">
+                    <AlertDescription>Connected successfully!</AlertDescription>
+                  </Alert>
                 )}
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="min-h-10" onClick={() => setEditingConnection(false)}>Cancel</Button>
-                  <Button variant="outline" size="sm" className="min-h-10" onClick={handleTestConnection} disabled={!newKey || testState === 'testing'}>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="min-h-10 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    onClick={() => setEditingConnection(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="min-h-10 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    onClick={handleTestConnection}
+                    disabled={!newKey || testState === 'testing'}
+                  >
                     {testState === 'testing' ? 'Testing…' : 'Test connection'}
                   </Button>
                   {testState === 'success' && (
@@ -186,34 +223,50 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
             )}
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-[box-shadow,border-color,transform] duration-200 ease-out hover:-translate-y-px hover:border-slate-300 hover:shadow-md">
+          <CardHeader className="space-y-1 p-5 pb-3">
             <CardTitle className="text-base font-semibold tracking-tight">Account</CardTitle>
             <CardDescription>{user?.email}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Button variant="outline" className="min-h-10" onClick={handleSignOut}>Sign out</Button>
+          <CardContent className="space-y-3 p-5 pt-0">
+            <Button
+              variant="secondary"
+              className="min-h-10 bg-slate-100 text-slate-700 hover:bg-slate-200"
+              onClick={handleSignOut}
+            >
+              Sign out
+            </Button>
             <Separator />
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <p className="text-sm font-medium text-red-600">Danger zone</p>
-              <p className="text-xs text-slate-500">Permanently delete your account and all stored credentials. Type your email to confirm.</p>
-              <Input placeholder={user?.email} value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} />
+              <p className="text-xs leading-relaxed text-slate-500">
+                This only deletes your account and data in WorkflowHQ. It will not modify, delete, or disconnect anything in your own n8n instances.
+                Type your email to confirm.
+              </p>
+              <Input
+                className={softInputClassName}
+                placeholder="Type your email to confirm"
+                autoComplete="off"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+              />
               <Button variant="destructive" size="sm" className="min-h-10" disabled={deleteConfirm !== user?.email || deletingAccount} onClick={handleDeleteAccount}>
                 {deletingAccount ? 'Deleting…' : 'Delete account'}
               </Button>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-[box-shadow,border-color,transform] duration-200 ease-out hover:-translate-y-px hover:border-slate-300 hover:shadow-md">
+          <CardHeader className="space-y-1 p-5 pb-3">
             <CardTitle className="text-base font-semibold tracking-tight">Feature announcement</CardTitle>
             <CardDescription>Publish what is new to logged-in users</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2.5 p-5 pt-0">
             <div className="space-y-1">
               <Label htmlFor="announcement-title">Title</Label>
               <Input
                 id="announcement-title"
+                className={softInputClassName}
                 placeholder="New trigger insights"
                 value={announcementTitle}
                 onChange={(e) => setAnnouncementTitle(e.target.value)}
@@ -223,6 +276,7 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
               <Label htmlFor="announcement-message">Message</Label>
               <Textarea
                 id="announcement-message"
+                className={softInputClassName}
                 placeholder="We now show trigger reliability directly in the workflow list."
                 value={announcementMessage}
                 onChange={(e) => setAnnouncementMessage(e.target.value)}
@@ -233,6 +287,7 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
                 <Label htmlFor="announcement-cta-label">CTA label (optional)</Label>
                 <Input
                   id="announcement-cta-label"
+                  className={softInputClassName}
                   placeholder="Read more"
                   value={announcementCtaLabel}
                   onChange={(e) => setAnnouncementCtaLabel(e.target.value)}
@@ -242,6 +297,7 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
                 <Label htmlFor="announcement-cta-url">CTA URL (optional)</Label>
                 <Input
                   id="announcement-cta-url"
+                  className={softInputClassName}
                   placeholder="https://..."
                   value={announcementCtaUrl}
                   onChange={(e) => setAnnouncementCtaUrl(e.target.value)}
@@ -249,12 +305,12 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
               </div>
             </div>
             {announcementError && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
                 <AlertDescription>{announcementError}</AlertDescription>
               </Alert>
             )}
             {announcementFeedback && (
-              <Alert>
+              <Alert className="border-emerald-200 bg-emerald-50 text-emerald-800">
                 <AlertDescription>{announcementFeedback}</AlertDescription>
               </Alert>
             )}
@@ -268,13 +324,13 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
           </CardContent>
         </Card>
         {showBillingSection && (
-          <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-            <CardHeader className="pb-4">
+          <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-[box-shadow,border-color,transform] duration-200 ease-out hover:-translate-y-px hover:border-slate-300 hover:shadow-md">
+            <CardHeader className="space-y-1 p-5 pb-3">
               <CardTitle className="text-base font-semibold tracking-tight">Billing & Plan</CardTitle>
               <CardDescription>Manage your subscription</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="py-6 text-center">
+            <CardContent className="p-5 pt-0">
+              <div className="py-4 text-center">
                 <Badge variant="outline" className="mb-2">Free plan</Badge>
                 <p className="text-sm text-slate-500">Billing coming soon.</p>
               </div>

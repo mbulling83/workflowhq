@@ -108,6 +108,7 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
           background: #f8fafc;
           box-shadow: 0 28px 70px rgba(15, 23, 42, 0.16), 0 8px 24px rgba(15, 23, 42, 0.06);
           border: 1px solid rgba(148, 163, 184, 0.24);
+          transition: box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 180ms ease;
         }
 
         .auth-left-panel {
@@ -140,7 +141,7 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
           font-weight: 700;
           font-size: 1rem;
           letter-spacing: -0.02em;
-          transition: color 140ms ease;
+          transition: color 140ms ease-out;
         }
 
         .auth-brand-link:hover {
@@ -228,6 +229,7 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
         .auth-form-shell {
           width: 100%;
           max-width: 420px;
+          margin-top: 0.75rem;
         }
 
         .auth-form-shell > * {
@@ -235,11 +237,11 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
           border: 1px solid #cbd5e1;
           background: #ffffff;
           box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255, 255, 255, 0.85) inset;
-          padding: 0.25rem;
+          padding: 0.75rem 0.25rem 0.25rem;
         }
 
         .auth-form-shell :is(input, button, a) {
-          transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+          transition: border-color 140ms ease-out, box-shadow 140ms ease-out, background-color 140ms ease-out, color 140ms ease-out, transform 120ms ease-out;
         }
 
         .auth-form-shell input {
@@ -264,10 +266,12 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
           color: #fff;
           border-color: #111827;
           box-shadow: 0 2px 10px rgba(17, 24, 39, 0.22);
+          transition: background-color 140ms ease-out, transform 120ms ease-out, box-shadow 160ms ease-out;
         }
 
         .auth-form-shell button[type='submit']:hover {
           background: #1f2937;
+          box-shadow: 0 6px 16px rgba(17, 24, 39, 0.25);
         }
 
         .auth-form-shell button[type='submit']:active {
@@ -298,6 +302,21 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
 
           .auth-right-panel {
             padding: 2rem 1.25rem;
+          }
+
+          .auth-form-shell {
+            margin-top: 0.5rem;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .auth-shell,
+          .auth-form-shell :is(input, button, a) {
+            transition: none !important;
+          }
+
+          .auth-form-shell button[type='submit']:active {
+            transform: none;
           }
         }
       `}</style>
