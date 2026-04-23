@@ -21,105 +21,61 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
 
   return (
     <AppProviders>
-      <main
-        style={{
-          minHeight: '100vh',
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-          background: 'radial-gradient(circle at 20% 0%, #e2e8f0 0%, #f1f5f9 40%, #f8fafc 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2rem',
-        }}
-      >
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '1080px',
-            minHeight: '680px',
-            display: 'flex',
-            borderRadius: '24px',
-            overflow: 'hidden',
-            background: '#f8fafc',
-            boxShadow: '0 28px 70px rgba(15, 23, 42, 0.18), 0 8px 24px rgba(15, 23, 42, 0.08)',
-            border: '1px solid rgba(148, 163, 184, 0.28)',
-          }}
-        >
+      <main className="auth-page">
+        <div className="auth-shell">
 
         {/* Left panel — branding */}
-        <div style={{
-          display: 'none',
-          flex: '0 0 430px',
-          background: '#0f172a',
-          padding: '3rem',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          position: 'relative',
-          overflow: 'hidden',
-        }} className="auth-left-panel">
+        <div className="auth-left-panel">
 
           {/* Subtle grid */}
-          <div style={{
-            position: 'absolute', inset: 0, pointerEvents: 'none',
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }} />
+          <div className="auth-grid-overlay" />
 
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <Link href="/" style={{ color: 'white', textDecoration: 'none', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em' }}>
+          <div className="auth-layer">
+            <Link href="/" className="auth-brand-link">
               WorkflowHQ
             </Link>
           </div>
 
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h1 style={{ color: '#f1f5f9', fontSize: '1.75rem', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 1rem' }}>
+          <div className="auth-layer">
+            <h1 className="auth-copy-title">
               {copy.heading}
             </h1>
-            <p style={{ color: 'rgba(241,245,249,0.65)', fontSize: '0.95rem', lineHeight: 1.6, margin: 0 }}>
+            <p className="auth-copy-sub">
               {copy.sub}
             </p>
 
-            <div style={{ marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="auth-points">
               {[
                 { icon: '⚡', text: 'All triggers at a glance — cron, webhooks, AI agents' },
                 { icon: '🔒', text: 'API keys encrypted at rest with AES-256-GCM' },
                 { icon: '⏱', text: 'Up and running in under 2 minutes' },
               ].map(({ icon, text }) => (
-                <div key={text} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '1rem', flexShrink: 0, marginTop: '0.05rem' }}>{icon}</span>
-                  <span style={{ color: 'rgba(241,245,249,0.7)', fontSize: '0.875rem', lineHeight: 1.5 }}>{text}</span>
+                <div key={text} className="auth-point">
+                  <span className="auth-point-icon">{icon}</span>
+                  <span className="auth-point-copy">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <p style={{ color: 'rgba(241,245,249,0.35)', fontSize: '0.8rem', margin: 0 }}>
+          <div className="auth-layer">
+            <p className="auth-copyright">
               © 2026 WorkflowHQ
             </p>
           </div>
         </div>
 
         {/* Right panel — form */}
-        <div style={{
-          flex: 1,
-          background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '3rem 2.5rem',
-          borderLeft: '1px solid rgba(148, 163, 184, 0.22)',
-        }}>
+        <div className="auth-right-panel">
 
           {/* Mobile logo */}
-          <div style={{ width: '100%', maxWidth: '400px', marginBottom: '2rem' }} className="auth-mobile-logo">
-            <Link href="/" style={{ color: '#0f172a', textDecoration: 'none', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em' }}>
+          <div className="auth-mobile-logo">
+            <Link href="/">
               ← WorkflowHQ
             </Link>
           </div>
 
-          <div style={{ width: '100%', maxWidth: '400px' }}>
+          <div className="auth-form-shell">
             <AuthView path={path} />
           </div>
         </div>
@@ -132,25 +88,216 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
           .auth-mobile-logo { display: none !important; }
         }
 
+        .auth-page {
+          min-height: 100vh;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: radial-gradient(circle at 20% 0%, #e2e8f0 0%, #f1f5f9 35%, #f8fafc 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+
+        .auth-shell {
+          width: 100%;
+          max-width: 1080px;
+          min-height: 680px;
+          display: flex;
+          border-radius: 24px;
+          overflow: hidden;
+          background: #f8fafc;
+          box-shadow: 0 28px 70px rgba(15, 23, 42, 0.16), 0 8px 24px rgba(15, 23, 42, 0.06);
+          border: 1px solid rgba(148, 163, 184, 0.24);
+        }
+
+        .auth-left-panel {
+          display: none;
+          flex: 0 0 430px;
+          background: #0f172a;
+          padding: 3rem;
+          flex-direction: column;
+          justify-content: space-between;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .auth-grid-overlay {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+          background-size: 40px 40px;
+        }
+
+        .auth-layer {
+          position: relative;
+          z-index: 1;
+        }
+
+        .auth-brand-link {
+          color: #fff;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 1rem;
+          letter-spacing: -0.02em;
+          transition: color 140ms ease;
+        }
+
+        .auth-brand-link:hover {
+          color: #cbd5e1;
+        }
+
+        .auth-copy-title {
+          color: #f1f5f9;
+          font-size: 1.75rem;
+          font-weight: 800;
+          line-height: 1.1;
+          letter-spacing: -0.03em;
+          margin: 0 0 1rem;
+          text-wrap: balance;
+        }
+
+        .auth-copy-sub {
+          color: rgba(241,245,249,0.65);
+          font-size: 0.95rem;
+          line-height: 1.6;
+          margin: 0;
+          text-wrap: pretty;
+        }
+
+        .auth-points {
+          margin-top: 2.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .auth-point {
+          display: flex;
+          gap: 0.75rem;
+          align-items: flex-start;
+        }
+
+        .auth-point-icon {
+          font-size: 1rem;
+          flex-shrink: 0;
+          margin-top: 0.05rem;
+        }
+
+        .auth-point-copy {
+          color: rgba(241,245,249,0.7);
+          font-size: 0.875rem;
+          line-height: 1.5;
+        }
+
+        .auth-copyright {
+          color: rgba(241,245,249,0.35);
+          font-size: 0.8rem;
+          margin: 0;
+        }
+
+        .auth-right-panel {
+          flex: 1;
+          background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 3rem 2.5rem;
+          border-left: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .auth-mobile-logo {
+          width: 100%;
+          max-width: 420px;
+          margin-bottom: 2rem;
+        }
+
         .auth-mobile-logo a {
           color: #334155 !important;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 1rem;
+          letter-spacing: -0.02em;
         }
 
         .auth-mobile-logo a:hover {
           color: #0f172a !important;
         }
 
-        .auth-left-panel h1 {
-          text-wrap: balance;
+        .auth-form-shell {
+          width: 100%;
+          max-width: 420px;
         }
 
-        .auth-left-panel p {
-          text-wrap: pretty;
+        .auth-form-shell > * {
+          border-radius: 14px;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255, 255, 255, 0.85) inset;
+          padding: 0.25rem;
+        }
+
+        .auth-form-shell :is(input, button, a) {
+          transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+        }
+
+        .auth-form-shell input {
+          border-radius: 10px;
+          border-color: #cbd5e1;
+        }
+
+        .auth-form-shell input:focus-visible {
+          border-color: #6366f1;
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+          outline: none;
+        }
+
+        .auth-form-shell button {
+          min-height: 40px;
+          border-radius: 10px;
+          font-weight: 600;
+        }
+
+        .auth-form-shell button[type='submit'] {
+          background: #111827;
+          color: #fff;
+          border-color: #111827;
+          box-shadow: 0 2px 10px rgba(17, 24, 39, 0.22);
+        }
+
+        .auth-form-shell button[type='submit']:hover {
+          background: #1f2937;
+        }
+
+        .auth-form-shell button[type='submit']:active {
+          transform: scale(0.98);
+        }
+
+        .auth-form-shell a {
+          text-underline-offset: 2px;
+        }
+
+        .auth-form-shell a:hover {
+          color: #1f2937;
+        }
+
+        .auth-form-shell :is(button, a):focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
         }
 
         @media (max-width: 767px) {
-          main {
+          .auth-page {
             padding: 1rem !important;
+          }
+
+          .auth-shell {
+            min-height: 0;
+          }
+
+          .auth-right-panel {
+            padding: 2rem 1.25rem;
           }
         }
       `}</style>

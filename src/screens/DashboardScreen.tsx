@@ -9,6 +9,12 @@ import { Sheet } from '@/components/ui/sheet'
 import { SettingsScreen } from './SettingsScreen'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/useAuth'
+import {
+  fetchLatestAnnouncement,
+  markAnnouncementSeen,
+  type FeatureAnnouncement,
+} from '@/services/announcements'
 
 const LOADING_MESSAGES = [
   'Fetching your workflows…',
@@ -24,12 +30,15 @@ interface DashboardScreenProps {
 
 export function DashboardScreen({ showBillingSection = true }: DashboardScreenProps = {}) {
   const router = useRouter()
+  const { token } = useAuth()
   const { connection } = useConnection()
   const [workflows, setWorkflows] = useState<Workflow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [msgIndex, setMsgIndex] = useState(0)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [announcement, setAnnouncement] = useState<FeatureAnnouncement | null>(null)
+  const [announcementLoading, setAnnouncementLoading] = useState(false)
 
   useEffect(() => {
     if (!loading) return
@@ -57,6 +66,40 @@ export function DashboardScreen({ showBillingSection = true }: DashboardScreenPr
   useEffect(() => {
     loadWorkflows()
   }, [loadWorkflows])
+
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+
+    const loadAnnouncement = async () => {
+      try {
+        const latest = await fetchLatestAnnouncement(token)
+        if (!cancelled && latest.announcement && !latest.hasSeen) {
+          setAnnouncement(latest.announcement)
+        }
+      } catch {
+        // Announcements are non-blocking for dashboard rendering.
+      }
+    }
+
+    loadAnnouncement()
+    return () => {
+      cancelled = true
+    }
+  }, [token])
+
+  const dismissAnnouncement = useCallback(async () => {
+    if (!announcement || !token) {
+      return
+    }
+    setAnnouncementLoading(true)
+    try {
+      await markAnnouncementSeen(token, announcement.id)
+      setAnnouncement(null)
+    } finally {
+      setAnnouncementLoading(false)
+    }
+  }, [announcement, token])
 
   if (loading) {
     return (
@@ -101,6 +144,30 @@ export function DashboardScreen({ showBillingSection = true }: DashboardScreenPr
     <div className="min-h-screen flex flex-col bg-slate-50">
       <TopNav workflowCount={workflows.length} onSettingsClick={() => setSettingsOpen(true)} />
       <main className="flex-1 p-6">
+        {announcement && (
+          <Alert className="mb-4 border-blue-200 bg-blue-50/70">
+            <AlertDescription>
+              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-blue-900">{announcement.title}</p>
+                  <p className="text-sm text-blue-800">{announcement.message}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {announcement.ctaLabel && announcement.ctaUrl && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={announcement.ctaUrl} target="_blank" rel="noreferrer">
+                        {announcement.ctaLabel}
+                      </a>
+                    </Button>
+                  )}
+                  <Button size="sm" onClick={dismissAnnouncement} disabled={announcementLoading}>
+                    {announcementLoading ? 'Saving…' : 'Got it'}
+                  </Button>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
         <WorkflowList workflows={workflows} onWorkflowUpdate={loadWorkflows} updateWorkflow={updateWorkflow} n8nBaseUrl={connection?.n8n_url} />
       </main>
       <Sheet open={settingsOpen} onClose={() => setSettingsOpen(false)}>

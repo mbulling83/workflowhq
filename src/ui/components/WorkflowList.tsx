@@ -74,7 +74,7 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
   // Apply filters, search, and sorting to each group
   const filteredGroups = useMemo(() => {
     const applyFiltersAndSearch = (triggers: TriggerInfo[], query: string) => {
-      let filtered = filterTriggers(triggers, filters)
+      let filtered = layout === 'table' ? triggers : filterTriggers(triggers, filters)
       
       // Apply search query
       if (query.trim()) {
@@ -119,6 +119,11 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
         })
       }
       
+      // Table mode uses column sorting within the table component
+      if (layout === 'table') {
+        return filtered
+      }
+
       // Apply sorting
       return sortTriggers(filtered, sortState.sortBy, sortState.sortOrder)
     }
@@ -130,7 +135,7 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
       manual: applyFiltersAndSearch(groupedTriggers.manual, searchQueryPerTab['manual'] || ''),
       other: applyFiltersAndSearch(groupedTriggers.other, searchQueryPerTab['other'] || ''),
     }
-  }, [groupedTriggers, filters, searchQueryPerTab, sortState])
+  }, [groupedTriggers, filters, searchQueryPerTab, sortState, layout])
 
   const tabs = [
     { id: 'cron', label: 'Cron', count: filteredGroups.cron.length },
@@ -307,17 +312,21 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
                 placeholder={`Search ${currentTab === 'ai' ? 'agents' : currentTab === 'manual' ? 'manual triggers' : `${currentTab} triggers`}...`}
                 suggestions={suggestions}
               />
-              <FilterBar
-                triggers={unfilteredTriggers}
-                type={currentTab as 'cron' | 'webhook' | 'ai' | 'tool' | 'manual' | 'other'}
-                filters={filters}
-                onFilterChange={setFilters}
-              />
-              <SortBar
-                sortState={sortState}
-                onSortChange={setSortState}
-                hasExecutedData={hasExecutedData}
-              />
+              {layout !== 'table' && (
+                <>
+                  <FilterBar
+                    triggers={unfilteredTriggers}
+                    type={currentTab as 'cron' | 'webhook' | 'ai' | 'tool' | 'manual' | 'other'}
+                    filters={filters}
+                    onFilterChange={setFilters}
+                  />
+                  <SortBar
+                    sortState={sortState}
+                    onSortChange={setSortState}
+                    hasExecutedData={hasExecutedData}
+                  />
+                </>
+              )}
             </div>
             <div className="flex items-start gap-4">
               <div className="flex-1 min-w-0">
@@ -397,7 +406,9 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
               ) : null}
             </div>
             {currentTriggers.length === 0 && (() => {
-              const hasActiveFilters = Object.keys(filters).some(k => filters[k as keyof FilterState] !== undefined)
+              const hasActiveFilters =
+                layout !== 'table' &&
+                Object.keys(filters).some(k => filters[k as keyof FilterState] !== undefined)
               const hasSearch = (searchQueryPerTab[currentTab] || '').trim().length > 0
               const isFiltered = hasActiveFilters || hasSearch
               const genuinelyEmpty = (groupedTriggers[currentTab as keyof typeof groupedTriggers] || []).length === 0
