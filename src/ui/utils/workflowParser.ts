@@ -55,37 +55,35 @@ function extractModelString(param: unknown): string | null {
   return null
 }
 
-function isActualAIAgentNode(nodeType: string): boolean {
+interface AIAgentClassification {
+  isAgent: boolean
+  reason: string
+}
+
+function classifyAIAgentNode(nodeType: string): AIAgentClassification {
   const type = nodeType.toLowerCase()
-
-  // Primary known n8n AI agent nodes
-  const isKnownAgentNode =
-    type === '@n8n/n8n-nodes-langchain.agent' ||
-    type.startsWith('@n8n/n8n-nodes-langchain.agent')
-
-  // Fallback for custom/community naming that still clearly indicates an agent
-  const looksLikeAgent = type.includes('langchain') && type.includes('agent')
-
-  if (!isKnownAgentNode && !looksLikeAgent) {
-    return false
+  const isLangchainNode = type.includes('langchain')
+  if (!isLangchainNode) {
+    return {
+      isAgent: false,
+      reason: 'not-langchain-node',
+    }
   }
 
-  // Exclude common non-agent langchain helpers often connected to agents
-  const excludedFragments = [
-    'chain',
-    'languagemodel',
-    'language_model',
-    'chatmodel',
-    'outputparser',
-    'output_parser',
-    'retriever',
-    'embedding',
-    'vectorstore',
-    'vector_store',
-    'splitter',
-  ]
+  return {
+    isAgent: true,
+    reason: 'langchain-node',
+  }
+}
 
-  return !excludedFragments.some((fragment) => type.includes(fragment))
+function isAIDebugEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+
+  const flag = window.localStorage.getItem('workflowhq_debug_ai')
+  if (flag === '1' || flag === 'true') return true
+
+  const params = new URLSearchParams(window.location.search)
+  return params.get('aiDebug') === '1'
 }
 
 export function parseWorkflows(workflows: Workflow[], baseUrl?: string): TriggerInfo[] {
@@ -163,9 +161,51 @@ export function parseWorkflows(workflows: Workflow[], baseUrl?: string): Trigger
 
     // Find AI agent nodes in the workflow (not just triggers)
     // AI nodes can be anywhere in the workflow, not just at the start
-    const aiAgentNodes = workflow.nodes.filter((node) => {
-      return isActualAIAgentNode(node.type)
+    const aiNodeDiagnostics = workflow.nodes.map((node) => {
+      const classification = classifyAIAgentNode(node.type)
+      return {
+        nodeId: node.id,
+        nodeName: node.name,
+        nodeType: node.type,
+        ...classification,
+      }
     })
+
+    const aiAgentNodes = workflow.nodes.filter((node) =>
+      classifyAIAgentNode(node.type).isAgent
+    )
+
+    if (isAIDebugEnabled()) {
+      const suspectedAiNodes = aiNodeDiagnostics.filter((node) => {
+        const type = node.nodeType.toLowerCase()
+        return (
+          type.includes('langchain') ||
+          type.includes('agent') ||
+          type.includes('chain') ||
+          type.includes('ai')
+        )
+      })
+
+      if (suspectedAiNodes.length > 0) {
+        console.groupCollapsed(
+          `[AI Parser Debug] Workflow "${workflow.name}" (${workflow.id}) — ${aiAgentNodes.length} agent node(s) selected`
+        )
+        console.table(
+          suspectedAiNodes.map((node) => ({
+            nodeName: node.nodeName || '(unnamed)',
+            nodeType: node.nodeType,
+            selected: node.isAgent ? 'yes' : 'no',
+            reason: node.reason,
+          }))
+        )
+        if (aiAgentNodes.length === 0) {
+          console.warn(
+            '[AI Parser Debug] No agent nodes selected. Use the table above to decide which exclusion rules should be relaxed.'
+          )
+        }
+        console.groupEnd()
+      }
+    }
 
     // Parse each AI agent node
     aiAgentNodes.forEach((node) => {
