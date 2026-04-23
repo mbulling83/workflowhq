@@ -133,37 +133,67 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
               </div>
               <div className="browser-content">
                 <div className="screenshot-placeholder">
-                  <div className="placeholder-header">
-                    <div className="placeholder-title">WorkflowHQ</div>
-                    <div className="placeholder-count">42 workflows</div>
-                  </div>
-                  <div className="placeholder-filters">
-                    <span className="filter-chip active">All</span>
-                    <span className="filter-chip">Cron</span>
-                    <span className="filter-chip">Webhook</span>
-                    <span className="filter-chip">AI Agents</span>
-                  </div>
-                  <div className="placeholder-workflows">
-                    <div className="placeholder-workflow">
-                      <div className="workflow-badge cron">⏰</div>
-                      <div className="workflow-info">
-                        <div className="workflow-name">Daily Report Generator</div>
-                        <div className="workflow-meta">Every day at 9:00 AM • Active</div>
-                      </div>
+                  <div className="placeholder-topnav">
+                    <div className="placeholder-brand">
+                      <span className="placeholder-title">WorkflowHQ</span>
+                      <span className="placeholder-count">42 workflows</span>
                     </div>
-                    <div className="placeholder-workflow">
-                      <div className="workflow-badge webhook">🔗</div>
-                      <div className="workflow-info">
-                        <div className="workflow-name">Stripe Payment Handler</div>
-                        <div className="workflow-meta">POST /webhook/stripe • Active</div>
-                      </div>
+                    <div className="placeholder-actions">
+                      <span className="placeholder-button ghost">Settings</span>
+                      <span className="placeholder-button ghost">Sign out</span>
                     </div>
+                  </div>
+
+                  <div className="placeholder-tabs">
+                    <span className="tab-chip active">Cron 12</span>
+                    <span className="tab-chip">Webhooks 9</span>
+                    <span className="tab-chip">AI Agents 6</span>
+                    <span className="tab-chip">Manual 15</span>
+                  </div>
+
+                  <div className="placeholder-controls">
+                    <span className="control-chip search">Search cron triggers...</span>
+                    <span className="control-chip">Active</span>
+                    <span className="control-chip">Last executed</span>
+                    <span className="control-chip">List</span>
+                  </div>
+
+                  <div className="placeholder-list">
+                    <div className="placeholder-list-header">
+                      <span>Workflow</span>
+                      <span>Schedule</span>
+                      <span>Status</span>
+                      <span>Last run</span>
+                    </div>
+
                     <div className="placeholder-workflow">
-                      <div className="workflow-badge ai">🤖</div>
                       <div className="workflow-info">
-                        <div className="workflow-name">Customer Support AI Agent</div>
-                        <div className="workflow-meta">GPT-4 • OpenAI • Active</div>
+                        <div className="workflow-name">Daily revenue digest</div>
+                        <div className="workflow-meta">Runs at 09:00 UTC</div>
                       </div>
+                      <div className="workflow-meta">0 9 * * *</div>
+                      <div className="workflow-status active">Active</div>
+                      <div className="workflow-meta">2m ago</div>
+                    </div>
+
+                    <div className="placeholder-workflow">
+                      <div className="workflow-info">
+                        <div className="workflow-name">Lead enrichment sync</div>
+                        <div className="workflow-meta">Runs every 30 minutes</div>
+                      </div>
+                      <div className="workflow-meta">*/30 * * * *</div>
+                      <div className="workflow-status active">Active</div>
+                      <div className="workflow-meta">12m ago</div>
+                    </div>
+
+                    <div className="placeholder-workflow">
+                      <div className="workflow-info">
+                        <div className="workflow-name">Customer retry notifier</div>
+                        <div className="workflow-meta">Runs at 15:00 UTC</div>
+                      </div>
+                      <div className="workflow-meta">0 15 * * 1-5</div>
+                      <div className="workflow-status paused">Paused</div>
+                      <div className="workflow-meta">1h ago</div>
                     </div>
                   </div>
                 </div>

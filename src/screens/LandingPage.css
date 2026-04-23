@@ -519,110 +519,178 @@
 .screenshot-placeholder {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.9rem;
 }
 
-.placeholder-header {
+.placeholder-topnav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.placeholder-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+}
+
+.placeholder-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .placeholder-title {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
 .placeholder-count {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
-.placeholder-filters {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.filter-chip {
-  padding: 0.3rem 0.875rem;
+.placeholder-button {
+  padding: 0.2rem 0.5rem;
   border-radius: 2px;
-  font-size: 0.78rem;
+  border: 1px solid var(--border-color);
+  font-size: 0.68rem;
   font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.placeholder-button.ghost {
+  background: var(--bg-secondary);
+}
+
+.placeholder-tabs {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.tab-chip {
+  padding: 0.28rem 0.6rem;
+  border-radius: 2px;
+  font-size: 0.68rem;
+  font-weight: 700;
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
-.filter-chip.active {
-  background: var(--accent);
-  color: white;
+.tab-chip.active {
+  background: var(--accent-light);
+  color: var(--accent);
   border-color: var(--accent);
 }
 
-.placeholder-workflows {
+.placeholder-controls {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.control-chip {
+  padding: 0.28rem 0.6rem;
+  border-radius: 2px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.control-chip.search {
+  min-width: 8rem;
+  color: var(--text-tertiary);
+}
+
+.placeholder-list {
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.placeholder-list-header {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 0.7fr 0.7fr;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.placeholder-workflows,
+.placeholder-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
 }
 
 .placeholder-workflow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 0.7fr 0.7fr;
+  gap: 0.5rem;
   align-items: center;
-  gap: 1rem;
-  padding: 0.875rem 1rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-left: 3px solid var(--accent);
-  border-radius: 2px;
-}
-
-.workflow-badge {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-
-.workflow-badge.cron {
-  background: rgba(79, 70, 229, 0.1);
-}
-
-.workflow-badge.webhook {
-  background: rgba(5, 150, 105, 0.1);
-}
-
-.workflow-badge.ai {
-  background: rgba(217, 119, 6, 0.12);
+  padding: 0.55rem 0.75rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workflow-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
 .workflow-name {
-  font-size: 0.9rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.1rem;
   letter-spacing: -0.01em;
 }
 
 .workflow-meta {
-  font-size: 0.75rem;
+  font-size: 0.66rem;
   color: var(--text-tertiary);
   font-weight: 500;
+}
+
+.workflow-status {
+  width: fit-content;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.workflow-status.active {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.workflow-status.paused {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 /* Common Section Styles */
