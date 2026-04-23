@@ -12,6 +12,9 @@ interface TriggerItemProps {
   type: 'cron' | 'webhook' | 'ai' | 'tool' | 'manual' | 'other'
   onPromptUpdate: (workflowId: string, nodeId: string, newPrompt: string) => Promise<void>
   n8nBaseUrl?: string
+  isSelected?: boolean
+  onSelectWorkflow?: (workflowId: string) => void
+  showDetailsButton?: boolean
 }
 
 function buildToolPillTitle(t: ConnectedToolInfo): string {
@@ -33,7 +36,15 @@ function DetailRow({ label, children, full }: { label: string; children: ReactNo
   )
 }
 
-function TriggerItem({ triggers, type, onPromptUpdate, n8nBaseUrl }: TriggerItemProps) {
+function TriggerItem({
+  triggers,
+  type,
+  onPromptUpdate,
+  n8nBaseUrl,
+  isSelected = false,
+  onSelectWorkflow,
+  showDetailsButton = true,
+}: TriggerItemProps) {
   const workflow = triggers[0]
 
   const getN8NBaseUrl = (): string | null => {
@@ -54,7 +65,7 @@ function TriggerItem({ triggers, type, onPromptUpdate, n8nBaseUrl }: TriggerItem
   const workflowUrl = baseUrl ? `${baseUrl}/workflow/${workflow.workflowId}` : null
 
   return (
-    <Card>
+    <Card className={cn(isSelected && 'ring-2 ring-slate-300 dark:ring-slate-600')}>
       <CardHeader>
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {workflowUrl ? (
@@ -79,6 +90,16 @@ function TriggerItem({ triggers, type, onPromptUpdate, n8nBaseUrl }: TriggerItem
         <Badge variant={workflow.active ? 'success' : 'secondary'}>
           {workflow.active ? 'Active' : 'Inactive'}
         </Badge>
+        {showDetailsButton && onSelectWorkflow && (
+          <button
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-500 dark:border-slate-600 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:border-slate-300 transition-colors"
+            onClick={() => onSelectWorkflow(workflow.workflowId)}
+            title="More info"
+            aria-label="More info"
+          >
+            <span className="text-[11px] font-semibold leading-none">i</span>
+          </button>
+        )}
       </CardHeader>
 
       <CardContent>

@@ -1,5 +1,6 @@
 import type { TriggerInfo } from '../types'
 import TriggerItem from './TriggerItem'
+import TriggerTable from './TriggerTable'
 import type { LayoutType } from './LayoutSelector'
 
 interface TriggerSectionProps {
@@ -9,9 +10,19 @@ interface TriggerSectionProps {
   layout: LayoutType
   onPromptUpdate: (workflowId: string, nodeId: string, newPrompt: string) => Promise<void>
   n8nBaseUrl?: string
+  selectedWorkflowId?: string
+  onSelectWorkflow: (workflowId: string) => void
 }
 
-function TriggerSection({ triggers, type, layout, onPromptUpdate, n8nBaseUrl }: TriggerSectionProps) {
+function TriggerSection({
+  triggers,
+  type,
+  layout,
+  onPromptUpdate,
+  n8nBaseUrl,
+  selectedWorkflowId,
+  onSelectWorkflow,
+}: TriggerSectionProps) {
   if (triggers.length === 0) return null
 
   const groupedByWorkflow = triggers.reduce((acc, trigger) => {
@@ -25,6 +36,19 @@ function TriggerSection({ triggers, type, layout, onPromptUpdate, n8nBaseUrl }: 
     ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'
     : 'flex flex-col gap-3'
 
+  if (layout === 'table') {
+    return (
+      <section>
+        <TriggerTable
+          groupedByWorkflow={groupedByWorkflow}
+          type={type}
+          selectedWorkflowId={selectedWorkflowId}
+          onSelectWorkflow={onSelectWorkflow}
+        />
+      </section>
+    )
+  }
+
   return (
     <section>
       <div className={gridClass}>
@@ -35,6 +59,8 @@ function TriggerSection({ triggers, type, layout, onPromptUpdate, n8nBaseUrl }: 
             type={type}
             onPromptUpdate={onPromptUpdate}
             n8nBaseUrl={n8nBaseUrl}
+            isSelected={selectedWorkflowId === workflowId}
+            onSelectWorkflow={onSelectWorkflow}
           />
         ))}
       </div>

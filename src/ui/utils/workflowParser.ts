@@ -55,6 +55,39 @@ function extractModelString(param: unknown): string | null {
   return null
 }
 
+function isActualAIAgentNode(nodeType: string): boolean {
+  const type = nodeType.toLowerCase()
+
+  // Primary known n8n AI agent nodes
+  const isKnownAgentNode =
+    type === '@n8n/n8n-nodes-langchain.agent' ||
+    type.startsWith('@n8n/n8n-nodes-langchain.agent')
+
+  // Fallback for custom/community naming that still clearly indicates an agent
+  const looksLikeAgent = type.includes('langchain') && type.includes('agent')
+
+  if (!isKnownAgentNode && !looksLikeAgent) {
+    return false
+  }
+
+  // Exclude common non-agent langchain helpers often connected to agents
+  const excludedFragments = [
+    'chain',
+    'languagemodel',
+    'language_model',
+    'chatmodel',
+    'outputparser',
+    'output_parser',
+    'retriever',
+    'embedding',
+    'vectorstore',
+    'vector_store',
+    'splitter',
+  ]
+
+  return !excludedFragments.some((fragment) => type.includes(fragment))
+}
+
 export function parseWorkflows(workflows: Workflow[], baseUrl?: string): TriggerInfo[] {
   const triggers: TriggerInfo[] = []
 
@@ -128,30 +161,10 @@ export function parseWorkflows(workflows: Workflow[], baseUrl?: string): Trigger
       }
     })
 
-    // Find ALL AI agent and chain nodes in the workflow (not just triggers)
+    // Find AI agent nodes in the workflow (not just triggers)
     // AI nodes can be anywhere in the workflow, not just at the start
     const aiAgentNodes = workflow.nodes.filter((node) => {
-      const type = node.type.toLowerCase()
-      
-      // Explicitly exclude language model nodes (these should only be connected to agents, not displayed separately)
-      const isLanguageModel = type.includes('languagemodel') || 
-                             type.includes('language_model') ||
-                             type.includes('lmchat') ||
-                             type.includes('chatmodel')
-      
-      // Explicitly exclude output parser nodes (these are connected to agents but aren't agents themselves)
-      const isOutputParser = type.includes('outputparser') ||
-                            type.includes('output_parser')
-      
-      if (isLanguageModel || isOutputParser) {
-        return false
-      }
-      
-      // Include agent and chain nodes
-      return type === '@n8n/n8n-nodes-langchain.agent' ||
-             type.includes('@n8n/n8n-nodes-langchain.chain') ||
-             (type.includes('agent') && type.includes('langchain')) ||
-             (type.includes('chain') && type.includes('langchain'))
+      return isActualAIAgentNode(node.type)
     })
 
     // Parse each AI agent node

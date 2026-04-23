@@ -11,6 +11,7 @@ import SearchBar from './SearchBar'
 import LayoutSelector, { type LayoutType } from './LayoutSelector'
 import Tabs from './Tabs'
 import CronCalendar from './CronCalendar'
+import WorkflowDetailsSidebar from './WorkflowDetailsSidebar'
 import { cn } from '../lib/utils'
 
 interface WorkflowListProps {
@@ -30,12 +31,12 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
   })
   const [layout, setLayout] = useState<LayoutType>(() => {
     const saved = localStorage.getItem('workflow-layout')
-    // If saved layout is masonry (removed), default to list
-    if (saved === 'masonry') {
+    if (saved === 'masonry' || (saved !== 'list' && saved !== 'grid' && saved !== 'table')) {
       return 'list'
     }
     return (saved as LayoutType) || 'list'
   })
+  const [selectedWorkflowByTab, setSelectedWorkflowByTab] = useState<Record<string, string | undefined>>({})
 
   const [cronView, setCronView] = useState<'list' | 'calendar'>(() => {
     const saved = localStorage.getItem('cron-view')
@@ -244,10 +245,65 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
   }, [workflows, onWorkflowUpdate, updateWorkflow])
 
   return (
-    <Tabs tabs={tabs} onTabChange={handleTabChange}>
+    <Tabs
+      tabs={tabs}
+      onTabChange={handleTabChange}
+      headerActions={(activeTab) => (
+        activeTab === 'cron' ? (
+          <div className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 p-0.5">
+            <button
+              className={cn(
+                'w-8 h-8 flex items-center justify-center rounded-md transition-colors',
+                cronView === 'list'
+                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+              )}
+              onClick={() => setCronView('list')}
+              title="List view"
+              aria-label="List view"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="12" height="2" rx="0.5" fill="currentColor" />
+                <rect x="2" y="7" width="12" height="2" rx="0.5" fill="currentColor" />
+                <rect x="2" y="12" width="12" height="2" rx="0.5" fill="currentColor" />
+              </svg>
+            </button>
+            <button
+              className={cn(
+                'w-8 h-8 flex items-center justify-center rounded-md transition-colors',
+                cronView === 'calendar'
+                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+              )}
+              onClick={() => setCronView('calendar')}
+              title="Calendar view"
+              aria-label="Calendar view"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="3" width="12" height="11" rx="1" stroke="currentColor" strokeWidth="1.25" />
+                <path d="M2 6.5H14M5 1.75V4.25M11 1.75V4.25" stroke="currentColor" strokeWidth="1.25" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <LayoutSelector layout={layout} onChange={setLayout} />
+        )
+      )}
+    >
       {(currentTab) => {
         const currentTriggers = filteredGroups[currentTab as keyof typeof filteredGroups] || []
         const suggestions = getSuggestions(currentTab)
+        const selectedWorkflowId = selectedWorkflowByTab[currentTab]
+        const selectedWorkflowTriggers =
+          selectedWorkflowId
+            ? currentTriggers.filter((trigger) => trigger.workflowId === selectedWorkflowId)
+            : null
+        const handleSelectWorkflow = (workflowId: string) => {
+          setSelectedWorkflowByTab((prev) => ({ ...prev, [currentTab]: workflowId }))
+        }
+        const handleCloseSidebar = () => {
+          setSelectedWorkflowByTab((prev) => ({ ...prev, [currentTab]: undefined }))
+        }
         
         // Check if any triggers in the unfiltered group have executed data
         const unfilteredTriggers = groupedTriggers[currentTab as keyof typeof groupedTriggers] || []
@@ -273,86 +329,84 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
                 onSortChange={setSortState}
                 hasExecutedData={hasExecutedData}
               />
-              {currentTab === 'cron' && (
-                <div className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 p-0.5">
-                  <button
-                    className={cn(
-                      'px-3 py-1 text-xs rounded-md transition-colors',
-                      cronView === 'list'
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-                    )}
-                    onClick={() => setCronView('list')}
-                  >List</button>
-                  <button
-                    className={cn(
-                      'px-3 py-1 text-xs rounded-md transition-colors',
-                      cronView === 'calendar'
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-                    )}
-                    onClick={() => setCronView('calendar')}
-                  >Calendar</button>
-                </div>
-              )}
-              {currentTab !== 'cron' && (
-                <LayoutSelector layout={layout} onChange={setLayout} />
-              )}
             </div>
-            {currentTab === 'cron' && (
-              cronView === 'calendar' ? (
-                <CronCalendar triggers={filteredGroups.cron} />
-              ) : (
-                <TriggerSection
-                  title="Cron Triggers"
-                  triggers={filteredGroups.cron}
-                  type="cron"
-                  layout={layout}
+            <div className="flex items-start gap-4">
+              <div className="flex-1 min-w-0">
+                {currentTab === 'cron' && (
+                  cronView === 'calendar' ? (
+                    <CronCalendar triggers={filteredGroups.cron} />
+                  ) : (
+                    <TriggerSection
+                      title="Cron Triggers"
+                      triggers={filteredGroups.cron}
+                      type="cron"
+                      layout={layout}
+                      onPromptUpdate={handlePromptUpdate}
+                      n8nBaseUrl={n8nBaseUrl}
+                      selectedWorkflowId={selectedWorkflowId}
+                      onSelectWorkflow={handleSelectWorkflow}
+                    />
+                  )
+                )}
+                {currentTab === 'webhook' && (
+                  <TriggerSection
+                    title="Webhook Triggers"
+                    triggers={filteredGroups.webhook}
+                    type="webhook"
+                    layout={layout}
+                    onPromptUpdate={handlePromptUpdate}
+                    n8nBaseUrl={n8nBaseUrl}
+                    selectedWorkflowId={selectedWorkflowId}
+                    onSelectWorkflow={handleSelectWorkflow}
+                  />
+                )}
+                {currentTab === 'ai' && (
+                  <TriggerSection
+                    title="AI Agents"
+                    triggers={filteredGroups.ai}
+                    type="ai"
+                    layout={layout}
+                    onPromptUpdate={handlePromptUpdate}
+                    n8nBaseUrl={n8nBaseUrl}
+                    selectedWorkflowId={selectedWorkflowId}
+                    onSelectWorkflow={handleSelectWorkflow}
+                  />
+                )}
+                {currentTab === 'manual' && (
+                  <TriggerSection
+                    title="Manual Triggers"
+                    triggers={filteredGroups.manual}
+                    type="manual"
+                    layout={layout}
+                    onPromptUpdate={handlePromptUpdate}
+                    n8nBaseUrl={n8nBaseUrl}
+                    selectedWorkflowId={selectedWorkflowId}
+                    onSelectWorkflow={handleSelectWorkflow}
+                  />
+                )}
+                {currentTab === 'other' && filteredGroups.other.length > 0 && (
+                  <TriggerSection
+                    title="Other Triggers"
+                    triggers={filteredGroups.other}
+                    type="other"
+                    layout={layout}
+                    onPromptUpdate={handlePromptUpdate}
+                    n8nBaseUrl={n8nBaseUrl}
+                    selectedWorkflowId={selectedWorkflowId}
+                    onSelectWorkflow={handleSelectWorkflow}
+                  />
+                )}
+              </div>
+              {(currentTab !== 'cron' || cronView !== 'calendar') && layout === 'table' ? (
+                <WorkflowDetailsSidebar
+                  workflowTriggers={selectedWorkflowTriggers && selectedWorkflowTriggers.length > 0 ? selectedWorkflowTriggers : null}
+                  type={currentTab as 'cron' | 'webhook' | 'ai' | 'tool' | 'manual' | 'other'}
                   onPromptUpdate={handlePromptUpdate}
+                  onClose={handleCloseSidebar}
                   n8nBaseUrl={n8nBaseUrl}
                 />
-              )
-            )}
-            {currentTab === 'webhook' && (
-              <TriggerSection
-                title="Webhook Triggers"
-                triggers={filteredGroups.webhook}
-                type="webhook"
-                layout={layout}
-                onPromptUpdate={handlePromptUpdate}
-                n8nBaseUrl={n8nBaseUrl}
-              />
-            )}
-            {currentTab === 'ai' && (
-              <TriggerSection
-                title="AI Agents"
-                triggers={filteredGroups.ai}
-                type="ai"
-                layout={layout}
-                onPromptUpdate={handlePromptUpdate}
-                n8nBaseUrl={n8nBaseUrl}
-              />
-            )}
-            {currentTab === 'manual' && (
-              <TriggerSection
-                title="Manual Triggers"
-                triggers={filteredGroups.manual}
-                type="manual"
-                layout={layout}
-                onPromptUpdate={handlePromptUpdate}
-                n8nBaseUrl={n8nBaseUrl}
-              />
-            )}
-            {currentTab === 'other' && filteredGroups.other.length > 0 && (
-              <TriggerSection
-                title="Other Triggers"
-                triggers={filteredGroups.other}
-                type="other"
-                layout={layout}
-                onPromptUpdate={handlePromptUpdate}
-                n8nBaseUrl={n8nBaseUrl}
-              />
-            )}
+              ) : null}
+            </div>
             {currentTriggers.length === 0 && (() => {
               const hasActiveFilters = Object.keys(filters).some(k => filters[k as keyof FilterState] !== undefined)
               const hasSearch = (searchQueryPerTab[currentTab] || '').trim().length > 0

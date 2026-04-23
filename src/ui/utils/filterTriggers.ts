@@ -1,6 +1,7 @@
 import type { TriggerInfo } from '../types'
 import type { FilterState } from '../components/FilterBar'
 import { getTriggerTypeCategory } from './formatTriggerType'
+import { getCronFrequency } from './cronFrequency'
 
 export function filterTriggers(triggers: TriggerInfo[], filters: FilterState): TriggerInfo[] {
   return triggers.filter(trigger => {
@@ -13,6 +14,14 @@ export function filterTriggers(triggers: TriggerInfo[], filters: FilterState): T
     // Filter by timezone (for cron)
     if (filters.timezone && trigger.details.timezone !== filters.timezone) {
       return false
+    }
+
+    // Filter by cron schedule frequency (for cron)
+    if (filters.cronFrequency) {
+      const frequency = getCronFrequency(trigger.details.cronExpression)
+      if (frequency !== filters.cronFrequency) {
+        return false
+      }
     }
 
     // Filter by HTTP method(s) (for webhooks)

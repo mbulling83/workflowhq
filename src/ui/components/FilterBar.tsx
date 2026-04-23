@@ -1,5 +1,6 @@
 import type { TriggerInfo } from '../types'
 import { getTriggerTypeCategory } from '../utils/formatTriggerType'
+import { getCronFrequency, sortCronFrequencies } from '../utils/cronFrequency'
 import { cn } from '../lib/utils'
 
 // Positive whitelist: values that are definitely model IDs
@@ -41,6 +42,7 @@ function toSortedUniqueValues(values: string[]): string[] {
 export interface FilterState {
   active?: 'all' | 'active' | 'inactive'
   timezone?: string
+  cronFrequency?: string
   httpMethod?: string // Keep for backward compatibility, but prefer httpMethods
   httpMethods?: string[] // Array of selected HTTP methods
   hasAuth?: 'all' | 'yes' | 'no'
@@ -66,6 +68,15 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
   const uniqueTimezones = Array.from(
     new Set(triggers.map(t => String(t.details.timezone || '')).filter(Boolean))
   ).sort()
+  const uniqueCronFrequencies = sortCronFrequencies(
+    Array.from(
+      new Set(
+        triggers
+          .map((t) => getCronFrequency(t.details.cronExpression))
+          .filter(Boolean)
+      )
+    )
+  )
 
   // Extract individual HTTP methods from comma-separated strings
   const uniqueHttpMethods = Array.from(
@@ -165,6 +176,22 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
             <option value="all">All</option>
             {uniqueTimezones.map(tz => (
               <option key={tz} value={tz}>{tz}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {type === 'cron' && uniqueCronFrequencies.length > 0 && (
+        <div className="flex items-center gap-1.5">
+          <label className={labelClass}>Schedule:</label>
+          <select
+            className={selectClass}
+            value={filters.cronFrequency || 'all'}
+            onChange={(e) => updateFilter('cronFrequency', e.target.value)}
+          >
+            <option value="all">All</option>
+            {uniqueCronFrequencies.map((frequency) => (
+              <option key={frequency} value={frequency}>{frequency}</option>
             ))}
           </select>
         </div>

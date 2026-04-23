@@ -1,14 +1,50 @@
-import Link from 'next/link'
-import './LandingPage.css'
+'use client'
 
-export function LandingScreen() {
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+
+type LandingScreenProps = {
+  showPricingSection?: boolean
+}
+
+export function LandingScreen({ showPricingSection = true }: LandingScreenProps) {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') {
+      return 'light'
+    }
+
+    const storedTheme = window.localStorage.getItem('landing-theme')
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      return storedTheme
+    }
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    window.localStorage.setItem('landing-theme', theme)
+  }, [theme])
+
+  function toggleTheme() {
+    setTheme((currentTheme) => (currentTheme === 'light' ? 'dark' : 'light'))
+  }
+
   return (
-    <div className="landing-page">
+    <div className="landing-page" data-theme={theme}>
       {/* Top Nav */}
       <nav className="landing-nav">
         <div className="landing-nav-inner">
           <Link href="/" className="landing-nav-logo">WorkflowHQ</Link>
           <div className="landing-nav-actions">
+            <button
+              type="button"
+              className="landing-nav-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+            </button>
             <Link href="/auth/sign-in" className="landing-nav-link">Sign in</Link>
             <Link href="/auth/sign-up" className="landing-nav-cta">Get started</Link>
           </div>
@@ -304,8 +340,8 @@ export function LandingScreen() {
 
             <div className="benefit-card">
               <div className="benefit-icon">🔓</div>
-              <h3>100% open source</h3>
-              <p>MIT licensed. Inspect the code, contribute, or fork it for your needs.</p>
+              <h3>Flexible and customizable</h3>
+              <p>Adapt your workflow setup to fit your team, process, and growing automation needs.</p>
             </div>
 
             <div className="benefit-card">
@@ -317,58 +353,59 @@ export function LandingScreen() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="pricing-section">
-        <div className="section-content">
-          <p className="section-label">Pricing</p>
-          <h2 className="section-title">
-            Start free, then unlock full control <span className="highlight">in the cloud</span>
-          </h2>
+      {showPricingSection && (
+        <section className="pricing-section">
+            <div className="section-content">
+              <p className="section-label">Pricing</p>
+              <h2 className="section-title">
+                Start free, then unlock full control <span className="highlight">in the cloud</span>
+              </h2>
 
-          <div className="pricing-grid">
-            <article className="pricing-card">
-              <p className="pricing-tier">Free</p>
-              <div className="pricing-value">
-                <span className="price-amount">$0</span>
-                <span className="price-period">/month</span>
-              </div>
-              <p className="pricing-description">
-                Everything you need to get started: full visibility into your workflows from any device.
-              </p>
-              <ul className="pricing-features">
-                <li>Workflow visibility, search, and filtering</li>
-                <li>Cron schedule overview</li>
-                <li>Webhook URL quick access</li>
-                <li>AI agent dashboard</li>
-              </ul>
-              <Link href="/auth/sign-up" className="pricing-button pricing-button-secondary">
-                Start Free
-              </Link>
-            </article>
+              <div className="pricing-grid">
+                <article className="pricing-card">
+                  <p className="pricing-tier">Free</p>
+                  <div className="pricing-value">
+                    <span className="price-amount">$0</span>
+                    <span className="price-period">/month</span>
+                  </div>
+                  <p className="pricing-description">
+                    Everything you need to get started: full visibility into your workflows from any device.
+                  </p>
+                  <ul className="pricing-features">
+                    <li>Workflow visibility, search, and filtering</li>
+                    <li>Cron schedule overview</li>
+                    <li>Webhook URL quick access</li>
+                    <li>AI agent dashboard</li>
+                  </ul>
+                  <Link href="/auth/sign-up" className="pricing-button pricing-button-secondary">
+                    Start Free
+                  </Link>
+                </article>
 
-            <article className="pricing-card pricing-card-featured">
-              <p className="pricing-badge">Recommended</p>
-              <p className="pricing-tier">In-Cloud</p>
-              <div className="pricing-value">
-                <span className="price-amount">$4</span>
-                <span className="price-period">/month</span>
+                <article className="pricing-card pricing-card-featured">
+                  <p className="pricing-badge">Recommended</p>
+                  <p className="pricing-tier">In-Cloud</p>
+                  <div className="pricing-value">
+                    <span className="price-amount">$4</span>
+                    <span className="price-period">/month</span>
+                  </div>
+                  <p className="pricing-description">
+                    Full workflow management in our cloud environment. Edit, bulk-manage, and unlock all AI features.
+                  </p>
+                  <ul className="pricing-features">
+                    <li>Edit workflows directly in WorkflowHQ</li>
+                    <li>Bulk edit workflows in one place</li>
+                    <li>All AI features included</li>
+                    <li>Priority support</li>
+                  </ul>
+                  <Link href="/auth/sign-up" className="pricing-button pricing-button-primary">
+                    Upgrade to In-Cloud
+                  </Link>
+                </article>
               </div>
-              <p className="pricing-description">
-                Full workflow management in our cloud environment. Edit, bulk-manage, and unlock all AI features.
-              </p>
-              <ul className="pricing-features">
-                <li>Edit workflows directly in WorkflowHQ</li>
-                <li>Bulk edit workflows in one place</li>
-                <li>All AI features included</li>
-                <li>Priority support</li>
-              </ul>
-              <Link href="/auth/sign-up" className="pricing-button pricing-button-primary">
-                Upgrade to In-Cloud
-              </Link>
-            </article>
-          </div>
-        </div>
-      </section>
+            </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="cta-section">
