@@ -7,6 +7,71 @@ type LandingScreenProps = {
   showPricingSection?: boolean
 }
 
+type DemoTabId = 'cron' | 'webhooks' | 'ai-agents' | 'manual'
+
+type DemoWorkflow = {
+  name: string
+  meta: string
+  trigger: string
+  status: 'Active' | 'Paused'
+  lastRun: string
+}
+
+type DemoTab = {
+  id: DemoTabId
+  label: string
+  count: number
+  searchPlaceholder: string
+  rows: DemoWorkflow[]
+}
+
+const DEMO_TABS: DemoTab[] = [
+  {
+    id: 'cron',
+    label: 'Cron',
+    count: 12,
+    searchPlaceholder: 'Search cron triggers...',
+    rows: [
+      { name: 'Daily revenue digest', meta: 'Runs at 09:00 UTC', trigger: '0 9 * * *', status: 'Active', lastRun: '2m ago' },
+      { name: 'Lead enrichment sync', meta: 'Runs every 30 minutes', trigger: '*/30 * * * *', status: 'Active', lastRun: '12m ago' },
+      { name: 'Customer retry notifier', meta: 'Runs at 15:00 UTC', trigger: '0 15 * * 1-5', status: 'Paused', lastRun: '1h ago' },
+    ],
+  },
+  {
+    id: 'webhooks',
+    label: 'Webhooks',
+    count: 9,
+    searchPlaceholder: 'Search webhook endpoints...',
+    rows: [
+      { name: 'Stripe checkout event', meta: 'POST /webhook/stripe-checkout', trigger: 'POST', status: 'Active', lastRun: '26s ago' },
+      { name: 'HubSpot lead capture', meta: 'POST /webhook/hubspot-lead', trigger: 'POST', status: 'Active', lastRun: '4m ago' },
+      { name: 'Inventory update relay', meta: 'PUT /webhook/inventory-sync', trigger: 'PUT', status: 'Paused', lastRun: '58m ago' },
+    ],
+  },
+  {
+    id: 'ai-agents',
+    label: 'AI Agents',
+    count: 6,
+    searchPlaceholder: 'Search AI workflows...',
+    rows: [
+      { name: 'Support triage assistant', meta: 'Routes tickets by intent', trigger: 'OpenAI + Claude', status: 'Active', lastRun: '41s ago' },
+      { name: 'Invoice extraction reviewer', meta: 'Validates OCR confidence', trigger: 'Gemini + Rules', status: 'Active', lastRun: '7m ago' },
+      { name: 'Prospect research copilot', meta: 'Enriches CRM records', trigger: 'Perplexity API', status: 'Paused', lastRun: '3h ago' },
+    ],
+  },
+  {
+    id: 'manual',
+    label: 'Manual',
+    count: 15,
+    searchPlaceholder: 'Search manual triggers...',
+    rows: [
+      { name: 'Re-run failed syncs', meta: 'Ops trigger for incidents', trigger: 'Manual trigger', status: 'Active', lastRun: '9m ago' },
+      { name: 'Backfill contacts by segment', meta: 'Started by revops team', trigger: 'Manual trigger', status: 'Active', lastRun: '1d ago' },
+      { name: 'Archive stale campaigns', meta: 'One-click cleanup flow', trigger: 'Manual trigger', status: 'Paused', lastRun: '5d ago' },
+    ],
+  },
+]
+
 export function LandingScreen({ showPricingSection = true }: LandingScreenProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window === 'undefined') {
@@ -20,6 +85,8 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
 
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
+  const [activeDemoTabId, setActiveDemoTabId] = useState<DemoTabId>('cron')
+  const activeDemoTab = DEMO_TABS.find((tab) => tab.id === activeDemoTabId) ?? DEMO_TABS[0]
 
   useEffect(() => {
     window.localStorage.setItem('landing-theme', theme)
@@ -65,7 +132,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
           </h1>
 
           <p className="hero-description">
-            See what is running, what is broken, and what needs attention in one clean view.
+            See what is running and what needs attention in one clean view.
             Manage schedules, webhooks, and AI agents without digging through dozens of workflow pages.
           </p>
 
@@ -145,14 +212,20 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
                   </div>
 
                   <div className="placeholder-tabs">
-                    <span className="tab-chip active">Cron 12</span>
-                    <span className="tab-chip">Webhooks 9</span>
-                    <span className="tab-chip">AI Agents 6</span>
-                    <span className="tab-chip">Manual 15</span>
+                    {DEMO_TABS.map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        className={`tab-chip ${tab.id === activeDemoTabId ? 'active' : ''}`}
+                        onClick={() => setActiveDemoTabId(tab.id)}
+                      >
+                        {tab.label} {tab.count}
+                      </button>
+                    ))}
                   </div>
 
                   <div className="placeholder-controls">
-                    <span className="control-chip search">Search cron triggers...</span>
+                    <span className="control-chip search">{activeDemoTab.searchPlaceholder}</span>
                     <span className="control-chip">Active</span>
                     <span className="control-chip">Last executed</span>
                     <span className="control-chip">List</span>
@@ -161,40 +234,22 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
                   <div className="placeholder-list">
                     <div className="placeholder-list-header">
                       <span>Workflow</span>
-                      <span>Schedule</span>
+                      <span>Trigger</span>
                       <span>Status</span>
                       <span>Last run</span>
                     </div>
 
-                    <div className="placeholder-workflow">
-                      <div className="workflow-info">
-                        <div className="workflow-name">Daily revenue digest</div>
-                        <div className="workflow-meta">Runs at 09:00 UTC</div>
+                    {activeDemoTab.rows.map((row) => (
+                      <div className="placeholder-workflow" key={row.name}>
+                        <div className="workflow-info">
+                          <div className="workflow-name">{row.name}</div>
+                          <div className="workflow-meta">{row.meta}</div>
+                        </div>
+                        <div className="workflow-meta">{row.trigger}</div>
+                        <div className={`workflow-status ${row.status.toLowerCase()}`}>{row.status}</div>
+                        <div className="workflow-meta">{row.lastRun}</div>
                       </div>
-                      <div className="workflow-meta">0 9 * * *</div>
-                      <div className="workflow-status active">Active</div>
-                      <div className="workflow-meta">2m ago</div>
-                    </div>
-
-                    <div className="placeholder-workflow">
-                      <div className="workflow-info">
-                        <div className="workflow-name">Lead enrichment sync</div>
-                        <div className="workflow-meta">Runs every 30 minutes</div>
-                      </div>
-                      <div className="workflow-meta">*/30 * * * *</div>
-                      <div className="workflow-status active">Active</div>
-                      <div className="workflow-meta">12m ago</div>
-                    </div>
-
-                    <div className="placeholder-workflow">
-                      <div className="workflow-info">
-                        <div className="workflow-name">Customer retry notifier</div>
-                        <div className="workflow-meta">Runs at 15:00 UTC</div>
-                      </div>
-                      <div className="workflow-meta">0 15 * * 1-5</div>
-                      <div className="workflow-status paused">Paused</div>
-                      <div className="workflow-meta">1h ago</div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -340,7 +395,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
               <div className="step-number">3</div>
               <h3 className="step-title">Start managing workflows</h3>
               <p className="step-description">
-                Get immediate visibility and start finding issues, bottlenecks, and opportunities.
+                Get immediate visibility and start finding bottlenecks and opportunities.
               </p>
             </div>
           </div>
