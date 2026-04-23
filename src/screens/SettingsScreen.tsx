@@ -17,9 +17,10 @@ type TestState = 'idle' | 'testing' | 'success' | 'error'
 
 interface SettingsScreenProps {
   onClose?: () => void
+  showBillingSection?: boolean
 }
 
-export function SettingsScreen({ onClose }: SettingsScreenProps = {}) {
+export function SettingsScreen({ onClose, showBillingSection = true }: SettingsScreenProps = {}) {
   const router = useRouter()
   const { user } = useAuth()
   const { connection, loading: connectionLoading } = useConnection()
@@ -167,18 +168,20 @@ export function SettingsScreen({ onClose }: SettingsScreenProps = {}) {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Billing & Plan</CardTitle>
-            <CardDescription>Manage your subscription</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="py-6 text-center">
-              <Badge variant="outline" className="mb-2">Free plan</Badge>
-              <p className="text-sm text-slate-500">Billing coming soon.</p>
-            </div>
-          </CardContent>
-        </Card>
+        {showBillingSection && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing & Plan</CardTitle>
+              <CardDescription>Manage your subscription</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="py-6 text-center">
+                <Badge variant="outline" className="mb-2">Free plan</Badge>
+                <p className="text-sm text-slate-500">Billing coming soon.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   )

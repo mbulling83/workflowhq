@@ -20,12 +20,12 @@ function WorkflowDetailsSidebar({
   return (
     <aside
       className={cn(
-        'w-0 overflow-hidden transition-all duration-200 ease-out',
-        workflowTriggers && 'w-full max-w-[420px]'
+        'w-0 overflow-hidden transition-all duration-200 ease-out self-start',
+        workflowTriggers && 'w-full max-w-[420px] sticky top-4 max-h-[calc(100vh-2rem)]'
       )}
     >
       {workflowTriggers && (
-        <div className="h-full border-l border-slate-200 dark:border-slate-800 pl-4">
+        <div className="h-full border-l border-slate-200 dark:border-slate-800 pl-4 flex flex-col">
           <div className="sticky top-0 bg-slate-50 dark:bg-slate-950 py-2 mb-2 z-10 flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Workflow Details
@@ -37,13 +37,15 @@ function WorkflowDetailsSidebar({
               Close
             </button>
           </div>
-          <TriggerItem
-            triggers={workflowTriggers}
-            type={type}
-            onPromptUpdate={onPromptUpdate}
-            n8nBaseUrl={n8nBaseUrl}
-            showDetailsButton={false}
-          />
+          <div className="overflow-y-auto pr-1 pb-2">
+            <TriggerItem
+              triggers={workflowTriggers}
+              type={type}
+              onPromptUpdate={onPromptUpdate}
+              n8nBaseUrl={n8nBaseUrl}
+              showDetailsButton={false}
+            />
+          </div>
         </div>
       )}
     </aside>

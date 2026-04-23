@@ -18,7 +18,11 @@ const LOADING_MESSAGES = [
   'Counting webhooks…',
 ]
 
-export function DashboardScreen() {
+interface DashboardScreenProps {
+  showBillingSection?: boolean
+}
+
+export function DashboardScreen({ showBillingSection = true }: DashboardScreenProps = {}) {
   const router = useRouter()
   const { connection } = useConnection()
   const [workflows, setWorkflows] = useState<Workflow[]>([])
@@ -100,7 +104,7 @@ export function DashboardScreen() {
         <WorkflowList workflows={workflows} onWorkflowUpdate={loadWorkflows} updateWorkflow={updateWorkflow} n8nBaseUrl={connection?.n8n_url} />
       </main>
       <Sheet open={settingsOpen} onClose={() => setSettingsOpen(false)}>
-        <SettingsScreen onClose={() => setSettingsOpen(false)} />
+        <SettingsScreen onClose={() => setSettingsOpen(false)} showBillingSection={showBillingSection} />
       </Sheet>
     </div>
   )

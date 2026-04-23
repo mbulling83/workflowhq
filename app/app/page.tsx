@@ -1,15 +1,8 @@
-'use client'
+import { showPricingSectionFlag } from '../flags'
+import { DashboardRouteClient } from './DashboardRouteClient'
 
-import { AuthGuard } from '@/components/AuthGuard'
-import { AppProviders } from '@/components/AppProviders'
-import { DashboardScreen } from '@/screens/DashboardScreen'
+export default async function DashboardRoute() {
+  const shouldShowPricingSection = await showPricingSectionFlag()
 
-export default function DashboardRoute() {
-  return (
-    <AppProviders>
-      <AuthGuard>
-        <DashboardScreen />
-      </AuthGuard>
-    </AppProviders>
-  )
+  return <DashboardRouteClient showBillingSection={shouldShowPricingSection} />
 }

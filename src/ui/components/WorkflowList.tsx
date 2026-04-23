@@ -12,7 +12,6 @@ import LayoutSelector, { type LayoutType } from './LayoutSelector'
 import Tabs from './Tabs'
 import CronCalendar from './CronCalendar'
 import WorkflowDetailsSidebar from './WorkflowDetailsSidebar'
-import { cn } from '../lib/utils'
 
 interface WorkflowListProps {
   workflows: Workflow[]
@@ -250,14 +249,9 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
       onTabChange={handleTabChange}
       headerActions={(activeTab) => (
         activeTab === 'cron' ? (
-          <div className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 p-0.5">
+          <div className="layout-selector">
             <button
-              className={cn(
-                'w-8 h-8 flex items-center justify-center rounded-md transition-colors',
-                cronView === 'list'
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-              )}
+              className={`layout-button ${cronView === 'list' ? 'active' : ''}`}
               onClick={() => setCronView('list')}
               title="List view"
               aria-label="List view"
@@ -269,12 +263,7 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
               </svg>
             </button>
             <button
-              className={cn(
-                'w-8 h-8 flex items-center justify-center rounded-md transition-colors',
-                cronView === 'calendar'
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-              )}
+              className={`layout-button ${cronView === 'calendar' ? 'active' : ''}`}
               onClick={() => setCronView('calendar')}
               title="Calendar view"
               aria-label="Calendar view"

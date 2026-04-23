@@ -44,6 +44,7 @@ function TriggerSection({
           type={type}
           selectedWorkflowId={selectedWorkflowId}
           onSelectWorkflow={onSelectWorkflow}
+          n8nBaseUrl={n8nBaseUrl}
         />
       </section>
     )

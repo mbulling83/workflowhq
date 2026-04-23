@@ -29,10 +29,19 @@
 }
 
 .layout-button.active {
-  background: var(--accent);
-  color: #fff;
+  background: #0f172a;
+  color: #ffffff;
 }
 
 .layout-button.active:hover {
-  background: var(--accent-hover);
+  background: #1e293b;
+}
+
+.dark .layout-button.active {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.dark .layout-button.active:hover {
+  background: #e2e8f0;
 }
