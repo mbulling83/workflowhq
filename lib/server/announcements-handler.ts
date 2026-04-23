@@ -8,7 +8,7 @@ const corsHeaders = {
 }
 
 interface AnnouncementRow {
-  id: number
+  id: number | string
   title: string
   message: string
   cta_label: string | null
@@ -25,7 +25,7 @@ interface CreateAnnouncementBody {
 }
 
 interface MarkSeenBody {
-  announcementId: number
+  announcementId: number | string
 }
 
 async function ensureAnnouncementTables() {
@@ -153,7 +153,8 @@ async function announcementsSeenHandler(req: Request): Promise<Response> {
 
   if (req.method === 'POST') {
     const { announcementId } = await parseJsonBody<MarkSeenBody>(req)
-    if (!announcementId || !Number.isInteger(announcementId)) {
+    const parsedAnnouncementId = Number.parseInt(String(announcementId), 10)
+    if (!Number.isInteger(parsedAnnouncementId) || parsedAnnouncementId <= 0) {
       return Response.json({ error: 'announcementId must be an integer' }, { status: 400, headers: corsHeaders })
     }
 
@@ -162,7 +163,7 @@ async function announcementsSeenHandler(req: Request): Promise<Response> {
        VALUES ($1, $2)
        ON CONFLICT (announcement_id, user_id) DO UPDATE
        SET seen_at = NOW()`,
-      [announcementId, user.id]
+      [parsedAnnouncementId, user.id]
     )
     return Response.json({ ok: true }, { headers: corsHeaders })
   }

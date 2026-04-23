@@ -272,6 +272,23 @@ function parseNode(node: Node, workflow: Workflow, baseUrl?: string): TriggerInf
             const value = interval.monthsInterval
             intervalParts.push(`Every ${value} ${value === 1 ? 'month' : 'months'}`)
           }
+          // Handle interval values provided without an explicit `field`
+          else if (interval.minutesInterval !== undefined) {
+            const value = interval.minutesInterval
+            intervalParts.push(`Every ${value} ${value === 1 ? 'minute' : 'minutes'}`)
+          } else if (interval.hoursInterval !== undefined) {
+            const value = interval.hoursInterval
+            intervalParts.push(`Every ${value} ${value === 1 ? 'hour' : 'hours'}`)
+          } else if (interval.daysInterval !== undefined) {
+            const value = interval.daysInterval
+            intervalParts.push(`Every ${value} ${value === 1 ? 'day' : 'days'}`)
+          } else if (interval.weeksInterval !== undefined) {
+            const value = interval.weeksInterval
+            intervalParts.push(`Every ${value} ${value === 1 ? 'week' : 'weeks'}`)
+          } else if (interval.monthsInterval !== undefined) {
+            const value = interval.monthsInterval
+            intervalParts.push(`Every ${value} ${value === 1 ? 'month' : 'months'}`)
+          }
           // Handle field specified without explicit interval (defaults to 1)
           else if (interval.field) {
             const field = interval.field.toLowerCase()
@@ -361,6 +378,21 @@ function parseNode(node: Node, workflow: Workflow, baseUrl?: string): TriggerInf
         } else if (interval.field && interval.daysInterval !== undefined) {
           const value = interval.daysInterval
           cronExpression = `Every ${value} ${value === 1 ? 'day' : 'days'}`
+        } else if (interval.minutesInterval !== undefined) {
+          const value = interval.minutesInterval
+          cronExpression = `Every ${value} ${value === 1 ? 'minute' : 'minutes'}`
+        } else if (interval.hoursInterval !== undefined) {
+          const value = interval.hoursInterval
+          cronExpression = `Every ${value} ${value === 1 ? 'hour' : 'hours'}`
+        } else if (interval.daysInterval !== undefined) {
+          const value = interval.daysInterval
+          cronExpression = `Every ${value} ${value === 1 ? 'day' : 'days'}`
+        } else if (interval.weeksInterval !== undefined) {
+          const value = interval.weeksInterval
+          cronExpression = `Every ${value} ${value === 1 ? 'week' : 'weeks'}`
+        } else if (interval.monthsInterval !== undefined) {
+          const value = interval.monthsInterval
+          cronExpression = `Every ${value} ${value === 1 ? 'month' : 'months'}`
         } else if (interval.everyXMinutes !== undefined) {
           const value = interval.everyXMinutes
           cronExpression = `Every ${value} ${value === 1 ? 'minute' : 'minutes'}`

@@ -1,7 +1,7 @@
 import { readApiError } from '@/lib/readApiError'
 
 export interface FeatureAnnouncement {
-  id: number
+  id: number | string
   title: string
   message: string
   ctaLabel: string | null
@@ -53,7 +53,7 @@ export async function createAnnouncement(token: string, payload: CreateAnnouncem
   }
 }
 
-export async function markAnnouncementSeen(token: string, announcementId: number): Promise<void> {
+export async function markAnnouncementSeen(token: string, announcementId: number | string): Promise<void> {
   const response = await fetch('/api/announcements/seen', {
     method: 'POST',
     headers: authHeaders(token),

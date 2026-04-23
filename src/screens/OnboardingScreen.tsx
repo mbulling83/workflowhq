@@ -20,13 +20,18 @@ export function OnboardingScreen() {
   const [testState, setTestState] = useState<TestState>('idle')
   const [testError, setTestError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const settingsApiUrl = `${n8nUrl.replace(/\/$/, '')}/settings/api`
+  const cardClassName = 'w-full max-w-2xl rounded-xl border-slate-200 bg-white shadow-sm'
+  const softInputClassName = 'border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 focus-visible:border-slate-300 focus-visible:ring-slate-300'
 
   const handleUrlNext = (e: React.FormEvent) => {
     e.preventDefault()
     try {
       new URL(n8nUrl)
       setStep('apikey')
-    } catch {}
+    } catch {
+      setTestError('Please enter a valid n8n URL.')
+    }
   }
 
   const handleTestConnection = async () => {
@@ -64,20 +69,36 @@ export function OnboardingScreen() {
 
   if (step === 'url') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Connect your n8n instance</CardTitle>
-            <CardDescription>Step 1 of 2 — Enter your n8n URL</CardDescription>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100/40 p-4">
+        <Card className={cardClassName}>
+          <CardHeader className="space-y-1 p-8 pb-4">
+            <CardTitle className="text-2xl font-semibold tracking-tight text-slate-900">Connect your n8n instance</CardTitle>
+            <CardDescription className="text-base text-slate-700">Step 1 of 2 — Enter your n8n URL</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6 p-8 pt-0">
             <form onSubmit={handleUrlNext} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="url">n8n URL</Label>
-                <Input id="url" type="url" placeholder="https://my-n8n.example.com" value={n8nUrl} onChange={(e) => setN8nUrl(e.target.value)} required />
-                <p className="text-xs text-slate-500">The base URL of your n8n instance, e.g. https://my-n8n.example.com</p>
+                <Label htmlFor="url" className="text-base font-medium text-slate-900">n8n URL</Label>
+                <Input
+                  id="url"
+                  type="url"
+                  className={`${softInputClassName} min-h-12`}
+                  placeholder="https://my-n8n.example.com"
+                  value={n8nUrl}
+                  onChange={(e) => {
+                    setN8nUrl(e.target.value)
+                    setTestError(null)
+                  }}
+                  required
+                />
+                <p className="text-sm text-slate-500">The base URL of your n8n instance, e.g. https://my-n8n.example.com</p>
               </div>
-              <Button type="submit" className="w-full">Next</Button>
+              {testError && (
+                <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+                  <AlertDescription>{testError}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="min-h-12 w-full">Next</Button>
             </form>
           </CardContent>
         </Card>
@@ -86,36 +107,58 @@ export function OnboardingScreen() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Connect your n8n instance</CardTitle>
-          <CardDescription>Step 2 of 2 — Add your API key</CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100/40 p-4">
+      <Card className={cardClassName}>
+        <CardHeader className="space-y-1 p-8 pb-4">
+          <CardTitle className="text-2xl font-semibold tracking-tight text-slate-900">Connect your n8n instance</CardTitle>
+          <CardDescription className="text-base text-slate-700">Step 2 of 2 — Add your API key</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 p-8 pt-0">
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-5 text-base text-slate-700">
+            <p className="text-base font-semibold tracking-tight text-slate-900">Generate your key in n8n</p>
+            <p>
+              1. Open{' '}
+              <a href={settingsApiUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline underline-offset-2 hover:text-blue-700">
+                {settingsApiUrl}
+              </a>
+            </p>
+            <p>2. Create an API key with only these scopes: <code className="rounded bg-slate-200 px-1">workflow:read</code> and <code className="rounded bg-slate-200 px-1">workflow:list</code>.</p>
+          </div>
           <div className="space-y-2">
-            <Label htmlFor="apikey">n8n API Key</Label>
-            <Input id="apikey" type="password" placeholder="n8n_api_..." value={apiKey} onChange={(e) => { setApiKey(e.target.value); setTestState('idle') }} />
-            <p className="text-xs text-slate-500">Find this in n8n → Settings → API → Create an API key</p>
+            <Label htmlFor="apikey" className="text-base font-medium text-slate-900">n8n API Key</Label>
+            <Input
+              id="apikey"
+              type="password"
+              className={`${softInputClassName} min-h-12`}
+              placeholder="n8n_api_..."
+              value={apiKey}
+              onChange={(e) => { setApiKey(e.target.value); setTestState('idle') }}
+            />
+            <p className="text-sm text-slate-500">Paste the API key you created from your instance settings page.</p>
           </div>
           {testState === 'error' && testError && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
               <AlertDescription>{testError}</AlertDescription>
             </Alert>
           )}
           {testState === 'success' && (
-            <Alert>
+            <Alert className="border-emerald-200 bg-emerald-50 text-emerald-800">
               <AlertDescription>Connected successfully!</AlertDescription>
             </Alert>
           )}
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setStep('url')} disabled={saving}>Back</Button>
-            <Button variant="outline" onClick={handleTestConnection} disabled={!apiKey || testState === 'testing' || saving} className="flex-1">
+            <Button variant="secondary" className="min-h-12 bg-slate-100 px-8 text-slate-700 hover:bg-slate-200" onClick={() => setStep('url')} disabled={saving}>Back</Button>
+            <Button
+              variant="secondary"
+              onClick={handleTestConnection}
+              disabled={!apiKey || testState === 'testing' || saving}
+              className="min-h-12 flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200"
+            >
               {testState === 'testing' ? 'Testing…' : 'Test connection'}
             </Button>
           </div>
           {testState === 'success' && (
-            <Button className="w-full" onClick={handleSaveAndContinue} disabled={saving}>
+            <Button className="min-h-12 w-full" onClick={handleSaveAndContinue} disabled={saving}>
               {saving ? 'Saving…' : 'Save & go to dashboard'}
             </Button>
           )}
