@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authClient } from '../lib/auth'
 import { readApiError } from '../lib/readApiError'
@@ -14,8 +14,12 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { createAnnouncement } from '@/services/announcements'
+import { fetchFeedbackInbox, type FeedbackSubmission } from '@/services/feedback'
+import { fetchBugInbox, type AppErrorLog } from '@/services/errors'
 
 type TestState = 'idle' | 'testing' | 'success' | 'error'
+type FeedbackFilter = 'all' | 'feedback' | 'bug' | 'idea' | 'question'
+type BugSourceFilter = 'all' | 'api' | 'auth'
 
 interface SettingsScreenProps {
   onClose?: () => void
@@ -41,6 +45,14 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
   const [publishingAnnouncement, setPublishingAnnouncement] = useState(false)
   const [announcementFeedback, setAnnouncementFeedback] = useState<string | null>(null)
   const [announcementError, setAnnouncementError] = useState<string | null>(null)
+  const [feedbackInbox, setFeedbackInbox] = useState<FeedbackSubmission[]>([])
+  const [loadingFeedbackInbox, setLoadingFeedbackInbox] = useState(false)
+  const [feedbackInboxError, setFeedbackInboxError] = useState<string | null>(null)
+  const [feedbackFilter, setFeedbackFilter] = useState<FeedbackFilter>('all')
+  const [bugInbox, setBugInbox] = useState<AppErrorLog[]>([])
+  const [loadingBugInbox, setLoadingBugInbox] = useState(false)
+  const [bugInboxError, setBugInboxError] = useState<string | null>(null)
+  const [bugSourceFilter, setBugSourceFilter] = useState<BugSourceFilter>('all')
   const softInputClassName = 'border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 focus-visible:border-slate-300 focus-visible:ring-slate-300'
 
   const handleTestConnection = async () => {
@@ -118,6 +130,56 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
       setPublishingAnnouncement(false)
     }
   }
+
+  const loadFeedbackInbox = useCallback(async () => {
+    if (!token) return
+    setLoadingFeedbackInbox(true)
+    setFeedbackInboxError(null)
+    try {
+      const rows = await fetchFeedbackInbox({
+        category: feedbackFilter,
+        limit: 30,
+      })
+      setFeedbackInbox(rows)
+    } catch (err) {
+      setFeedbackInboxError(err instanceof Error ? err.message : 'Failed to load feedback inbox')
+      setFeedbackInbox([])
+    } finally {
+      setLoadingFeedbackInbox(false)
+    }
+  }, [feedbackFilter, token])
+
+  const loadBugInbox = useCallback(async () => {
+    if (!token) return
+    setLoadingBugInbox(true)
+    setBugInboxError(null)
+    try {
+      const rows = await fetchBugInbox({
+        source: bugSourceFilter,
+        limit: 30,
+      })
+      setBugInbox(rows)
+    } catch (err) {
+      setBugInboxError(err instanceof Error ? err.message : 'Failed to load bug inbox')
+      setBugInbox([])
+    } finally {
+      setLoadingBugInbox(false)
+    }
+  }, [bugSourceFilter, token])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadFeedbackInbox()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [loadFeedbackInbox])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadBugInbox()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [loadBugInbox])
 
   return (
     <div className="flex flex-col h-full">
@@ -221,6 +283,124 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-[box-shadow,border-color,transform] duration-200 ease-out hover:-translate-y-px hover:border-slate-300 hover:shadow-md">
+          <CardHeader className="space-y-1 p-5 pb-3">
+            <CardTitle className="text-base font-semibold tracking-tight">Bug inbox</CardTitle>
+            <CardDescription>Recent runtime errors captured from production app logs</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 p-5 pt-0">
+            <div className="flex flex-wrap gap-2">
+              <select
+                className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                value={bugSourceFilter}
+                onChange={(event) => setBugSourceFilter(event.target.value as BugSourceFilter)}
+              >
+                <option value="all">All sources</option>
+                <option value="api">API</option>
+                <option value="auth">Auth</option>
+              </select>
+              <Button
+                variant="secondary"
+                className="min-h-10 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                onClick={loadBugInbox}
+                disabled={loadingBugInbox}
+              >
+                {loadingBugInbox ? 'Refreshing…' : 'Refresh'}
+              </Button>
+            </div>
+
+            {bugInboxError && (
+              <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+                <AlertDescription>{bugInboxError}</AlertDescription>
+              </Alert>
+            )}
+
+            {!bugInboxError && !bugInbox.length && !loadingBugInbox && (
+              <p className="text-sm text-slate-500">No bugs found for this source filter.</p>
+            )}
+
+            <div className="space-y-2">
+              {bugInbox.map((entry) => (
+                <div key={entry.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="uppercase">{entry.source}</Badge>
+                      <Badge variant="secondary" className="uppercase">{entry.category}</Badge>
+                    </div>
+                    <span className="text-xs text-slate-500">
+                      {new Date(entry.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-800">{entry.error_message}</p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    {entry.email ?? 'Unknown user'} · {entry.route ?? 'Unknown route'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-[box-shadow,border-color,transform] duration-200 ease-out hover:-translate-y-px hover:border-slate-300 hover:shadow-md">
+          <CardHeader className="space-y-1 p-5 pb-3">
+            <CardTitle className="text-base font-semibold tracking-tight">Feedback inbox</CardTitle>
+            <CardDescription>Recent user feedback from the floating widget</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 p-5 pt-0">
+            <div className="flex flex-wrap gap-2">
+              <select
+                className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                value={feedbackFilter}
+                onChange={(event) => setFeedbackFilter(event.target.value as FeedbackFilter)}
+              >
+                <option value="all">All categories</option>
+                <option value="feedback">Feedback</option>
+                <option value="bug">Bug</option>
+                <option value="idea">Idea</option>
+                <option value="question">Question</option>
+              </select>
+              <Button
+                variant="secondary"
+                className="min-h-10 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                onClick={loadFeedbackInbox}
+                disabled={loadingFeedbackInbox}
+              >
+                {loadingFeedbackInbox ? 'Refreshing…' : 'Refresh'}
+              </Button>
+            </div>
+
+            {feedbackInboxError && (
+              <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+                <AlertDescription>{feedbackInboxError}</AlertDescription>
+              </Alert>
+            )}
+
+            {!feedbackInboxError && !feedbackInbox.length && !loadingFeedbackInbox && (
+              <p className="text-sm text-slate-500">No feedback yet for this filter.</p>
+            )}
+
+            <div className="space-y-2">
+              {feedbackInbox.map((entry) => (
+                <div key={entry.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="uppercase">{entry.category}</Badge>
+                      {entry.used_voice_input && (
+                        <Badge variant="secondary">Voice</Badge>
+                      )}
+                    </div>
+                    <span className="text-xs text-slate-500">
+                      {new Date(entry.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-800">{entry.message}</p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    {entry.email ?? 'Anonymous'} · {entry.page_path ?? 'Unknown page'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
         <Card className="rounded-xl border-slate-200 bg-white shadow-sm transition-[box-shadow,border-color,transform] duration-200 ease-out hover:-translate-y-px hover:border-slate-300 hover:shadow-md">
