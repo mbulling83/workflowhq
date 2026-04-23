@@ -56,17 +56,17 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
         <div className="hero-content">
           <div className="hero-badge">
             <span className="badge-icon">⚡</span>
-            <span className="badge-text">Your N8N, Supercharged</span>
+            <span className="badge-text">Clarity for busy automation teams</span>
           </div>
 
           <h1 className="hero-title">
-            Manage your N8N workflows
-            <span className="hero-title-gradient"> at a glance</span>
+            Stop guessing what your workflows are doing
+            <span className="hero-title-gradient"> and take control fast</span>
           </h1>
 
           <p className="hero-description">
-            A beautiful, minimalist dashboard that makes managing hundreds of N8N workflows effortless.
-            See schedules, webhooks, and AI agents organized exactly how you need them.
+            See what is running, what is broken, and what needs attention in one clean view.
+            Manage schedules, webhooks, and AI agents without digging through dozens of workflow pages.
           </p>
 
           <div className="hero-cta-group">
@@ -84,15 +84,15 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
           <div className="hero-stats">
             <div className="stat-item">
               <div className="stat-value">2 min</div>
-              <div className="stat-label">Setup time</div>
+              <div className="stat-label">Time to first insight</div>
             </div>
             <div className="stat-item">
               <div className="stat-value">100%</div>
-              <div className="stat-label">Open source</div>
+              <div className="stat-label">Your data stays yours</div>
             </div>
             <div className="stat-item">
               <div className="stat-value">Encrypted</div>
-              <div className="stat-label">Data storage</div>
+              <div className="stat-label">By default</div>
             </div>
           </div>
         </div>
@@ -178,28 +178,28 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
         <div className="section-content">
           <p className="section-label">The Problem</p>
           <h2 className="section-title">
-            N8N&apos;s interface wasn&apos;t built for <span className="highlight">managing hundreds of workflows</span>
+            When automation grows, visibility drops <span className="highlight">and problems hide in plain sight</span>
           </h2>
           <div className="problem-grid">
             <div className="problem-card">
               <span className="problem-icon">🔍</span>
               <h3>Hard to find workflows</h3>
-              <p>Scrolling through endless lists to find the one workflow you need.</p>
+              <p>Waste less time searching and more time fixing what matters.</p>
             </div>
             <div className="problem-card">
               <span className="problem-icon">📅</span>
               <h3>Can&apos;t see schedules at a glance</h3>
-              <p>Opening each workflow individually just to check when it runs.</p>
+              <p>Missed schedules lead to missed reports, alerts, and follow-ups.</p>
             </div>
             <div className="problem-card">
               <span className="problem-icon">🔗</span>
               <h3>Webhook URLs buried deep</h3>
-              <p>Clicking through multiple screens to copy a simple webhook URL.</p>
+              <p>Simple tasks take too many clicks when you are under pressure.</p>
             </div>
             <div className="problem-card">
               <span className="problem-icon">🤖</span>
               <h3>No AI agent overview</h3>
-              <p>Can&apos;t see which models, prompts, or providers your agents use.</p>
+              <p>It is hard to trust results when you cannot quickly inspect agent setup.</p>
             </div>
           </div>
         </div>
@@ -210,71 +210,71 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
         <div className="section-content">
           <p className="section-label">Features</p>
           <h2 className="section-title">
-            Everything you need to manage workflows <span className="highlight">effortlessly</span>
+            Everything you need to run automation <span className="highlight">with confidence</span>
           </h2>
 
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">⚡</div>
-              <h3 className="feature-title">Instant Overview</h3>
+              <h3 className="feature-title">See the full picture instantly</h3>
               <p className="feature-description">
-                See all your workflows grouped by type: cron schedules, webhooks, AI agents, manual triggers, and more.
+                Get one organized view of every workflow so you can spot priorities and act quickly.
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🔍</div>
-              <h3 className="feature-title">Powerful Search & Filters</h3>
+              <h3 className="feature-title">Find anything in seconds</h3>
               <p className="feature-description">
-                Find any workflow instantly with search, filters, and sorting. Filter by active/inactive, trigger type, or search by name.
+                Search by name, status, or trigger type to jump straight to the workflow you need.
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">📅</div>
-              <h3 className="feature-title">Schedule Visibility</h3>
+              <h3 className="feature-title">Never miss a schedule</h3>
               <p className="feature-description">
-                See all cron schedules, timezones, and expressions in one place. No more opening workflows to check when they run.
+                Keep schedules visible in one place so time-based automations stay reliable.
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🔗</div>
-              <h3 className="feature-title">Quick Webhook Access</h3>
+              <h3 className="feature-title">Copy webhook details instantly</h3>
               <p className="feature-description">
-                Copy webhook URLs instantly. See HTTP methods, authentication status, and test vs. production URLs at a glance.
+                Grab URLs, methods, and auth details fast when integrations need updates.
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🤖</div>
-              <h3 className="feature-title">AI Agent Dashboard</h3>
+              <h3 className="feature-title">Keep AI agents under control</h3>
               <p className="feature-description">
-                View all your LangChain agents, models, providers, and prompts. Edit prompts directly without opening N8N.
+                Review models, providers, and prompts quickly so agent behavior stays predictable.
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🚀</div>
-              <h3 className="feature-title">One-Click Access</h3>
+              <h3 className="feature-title">Jump in with one click</h3>
               <p className="feature-description">
-                Jump straight to any workflow in N8N with a single click. Seamless integration with your existing setup.
+                Open the exact workflow you need in N8N without losing momentum.
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🌙</div>
-              <h3 className="feature-title">Dark Mode</h3>
+              <h3 className="feature-title">Comfortable, all-day workspace</h3>
               <p className="feature-description">
-                Beautiful light and dark themes that are easy on your eyes during long debugging sessions.
+                Light and dark themes help your team stay focused during long operations and incident response.
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🔒</div>
-              <h3 className="feature-title">Security First</h3>
+              <h3 className="feature-title">Security built in</h3>
               <p className="feature-description">
-                All credentials encrypted and stored securely. Your N8N API keys are protected with AES-256 encryption.
+                Credentials and keys are encrypted by default so you can move fast with peace of mind.
               </p>
             </div>
           </div>
@@ -286,7 +286,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
         <div className="section-content">
           <p className="section-label">How It Works</p>
           <h2 className="section-title">
-            Get started in <span className="highlight">under 2 minutes</span>
+            Go from setup to value <span className="highlight">in minutes</span>
           </h2>
 
           <div className="steps-grid">
@@ -294,7 +294,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
               <div className="step-number">1</div>
               <h3 className="step-title">Create your account</h3>
               <p className="step-description">
-                Sign up for free in seconds. No credit card required.
+                Sign up in seconds and invite your team when you are ready.
               </p>
             </div>
 
@@ -302,7 +302,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
               <div className="step-number">2</div>
               <h3 className="step-title">Connect your N8N instance</h3>
               <p className="step-description">
-                Enter your N8N URL and API key. We&apos;ll verify the connection instantly.
+                Add your N8N URL and API key. Connection checks happen automatically.
               </p>
             </div>
 
@@ -310,7 +310,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
               <div className="step-number">3</div>
               <h3 className="step-title">Start managing workflows</h3>
               <p className="step-description">
-                See all your workflows organized by type, with full search, filtering, and editing.
+                Get immediate visibility and start finding issues, bottlenecks, and opportunities.
               </p>
             </div>
           </div>
@@ -322,32 +322,32 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
         <div className="section-content">
           <p className="section-label">Why Choose Us</p>
           <h2 className="section-title">
-            Built for teams who <span className="highlight">love N8N</span>
+            Built for teams who need <span className="highlight">reliable automation at scale</span>
           </h2>
 
           <div className="benefits-grid">
             <div className="benefit-card">
               <div className="benefit-icon">💻</div>
               <h3>Access from anywhere</h3>
-              <p>Manage your workflows from any device, anywhere. No local setup required.</p>
+              <p>Check and manage workflows from anywhere without depending on one machine.</p>
             </div>
 
             <div className="benefit-card">
               <div className="benefit-icon">⚡</div>
-              <h3>Lightning fast</h3>
-              <p>Built with modern React and Next.js. Load hundreds of workflows instantly.</p>
+              <h3>Fast when it counts</h3>
+              <p>Handle large workflow collections quickly, even during high-pressure moments.</p>
             </div>
 
             <div className="benefit-card">
               <div className="benefit-icon">🔓</div>
               <h3>Flexible and customizable</h3>
-              <p>Adapt your workflow setup to fit your team, process, and growing automation needs.</p>
+              <p>Shape views and processes around your team&apos;s way of working as needs evolve.</p>
             </div>
 
             <div className="benefit-card">
               <div className="benefit-icon">🛡️</div>
               <h3>Secure by default</h3>
-              <p>All data encrypted and stored securely. API keys protected with AES-256-GCM.</p>
+              <p>Protect sensitive credentials automatically without adding security overhead.</p>
             </div>
           </div>
         </div>
@@ -358,7 +358,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
             <div className="section-content">
               <p className="section-label">Pricing</p>
               <h2 className="section-title">
-                Start free, then unlock full control <span className="highlight">in the cloud</span>
+                Start free, then unlock deeper workflow control <span className="highlight">as you scale</span>
               </h2>
 
               <div className="pricing-grid">
@@ -369,7 +369,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
                     <span className="price-period">/month</span>
                   </div>
                   <p className="pricing-description">
-                    Everything you need to get started: full visibility into your workflows from any device.
+                    Everything you need to get clear visibility across your workflows from day one.
                   </p>
                   <ul className="pricing-features">
                     <li>Workflow visibility, search, and filtering</li>
@@ -390,7 +390,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
                     <span className="price-period">/month</span>
                   </div>
                   <p className="pricing-description">
-                    Full workflow management in our cloud environment. Edit, bulk-manage, and unlock all AI features.
+                    Advanced workflow operations for growing teams that need speed, consistency, and control.
                   </p>
                   <ul className="pricing-features">
                     <li>Edit workflows directly in WorkflowHQ</li>
@@ -410,9 +410,9 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-content">
-          <h2 className="cta-title">Ready to supercharge your N8N workflows?</h2>
+          <h2 className="cta-title">Ready to make your automation easier to run?</h2>
           <p className="cta-description">
-            Start for free, or choose in-cloud for editing, bulk edits, and all AI features.
+            Start free today and give your team one clear place to manage every workflow.
           </p>
           <Link href="/auth/sign-up" className="cta-button">
             Get Started
@@ -427,7 +427,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
         <div className="footer-content">
           <div className="footer-left">
             <div className="footer-logo">WorkflowHQ</div>
-            <p className="footer-tagline">Manage your N8N workflows at a glance</p>
+            <p className="footer-tagline">The clearest way to run your N8N operations</p>
           </div>
           <div className="footer-links">
             <Link href="/auth/sign-in" className="footer-link">Sign In</Link>
@@ -436,7 +436,7 @@ export function LandingScreen({ showPricingSection = true }: LandingScreenProps)
         </div>
         <div className="footer-bottom">
           <p className="footer-copyright">
-            © 2026 WorkflowHQ. Open source under MIT License.
+            © 2026 WorkflowHQ. All rights reserved.
           </p>
         </div>
       </footer>
