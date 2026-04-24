@@ -28,11 +28,16 @@ async function connectionHandler(req: Request): Promise<Response> {
   const pool = getAppPool()
 
   if (req.method === 'GET') {
-    const result = await pool.query(
-      'SELECT id, n8n_url, verified FROM user_connections WHERE user_id = $1',
-      [user.id]
-    )
-    return Response.json(result.rows[0] ?? null, { headers: corsHeaders })
+    try {
+      const result = await pool.query(
+        'SELECT id, n8n_url, verified FROM user_connections WHERE user_id = $1',
+        [user.id]
+      )
+      return Response.json(result.rows[0] ?? null, { headers: corsHeaders })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Database error'
+      return Response.json({ error: msg }, { status: 500, headers: corsHeaders })
+    }
   }
 
   if (req.method === 'POST' || req.method === 'PUT') {

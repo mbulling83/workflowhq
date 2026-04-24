@@ -32,9 +32,11 @@ export function TopNav({ workflowCount, onSettingsClick }: TopNavProps) {
         )}
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={onSettingsClick}>
-          Settings
-        </Button>
+        {onSettingsClick && (
+          <Button variant="ghost" size="sm" onClick={onSettingsClick}>
+            Settings
+          </Button>
+        )}
         <Button variant="ghost" size="sm" onClick={handleSignOut}>
           Sign out
         </Button>

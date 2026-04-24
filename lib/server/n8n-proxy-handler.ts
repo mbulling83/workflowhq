@@ -101,6 +101,7 @@ async function n8nProxyHandler(req: Request): Promise<Response> {
     }
     if (body.action === 'update') {
       if (!body.workflowId || !body.payload) return Response.json({ error: 'workflowId and payload required' }, { status: 400, headers: withTraceHeaders(corsHeaders) })
+      if (!/^[a-zA-Z0-9_-]+$/.test(body.workflowId)) return Response.json({ error: 'Invalid workflowId' }, { status: 400, headers: withTraceHeaders(corsHeaders) })
       const patchUrl = `${workflowClient.workflowsUrl}/${body.workflowId}`
       const remainingMs = deadlineAt - Date.now()
       if (remainingMs <= 500) throw new Error(`Proxy time budget exhausted (${N8N_PROXY_BUDGET_MS}ms)`)

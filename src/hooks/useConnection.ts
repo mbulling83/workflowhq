@@ -21,6 +21,8 @@ export function useConnection() {
     })
     if (res.ok) {
       setConnection(await res.json())
+    } else {
+      console.error('[useConnection] fetch failed:', res.status, res.statusText)
     }
     setLoading(false)
   }

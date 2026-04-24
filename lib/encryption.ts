@@ -3,7 +3,7 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 
 function getKey(): Buffer {
   const hex = process.env.ENCRYPTION_KEY
-  if (!hex || hex.length !== 64) {
+  if (!hex || hex.length !== 64 || !/^[0-9a-f]{64}$/i.test(hex)) {
     throw new Error('ENCRYPTION_KEY must be a 64-character hex string (32 bytes)')
   }
   return Buffer.from(hex, 'hex')

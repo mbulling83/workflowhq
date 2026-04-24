@@ -48,7 +48,7 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
               {[
                 { icon: '⚡', text: 'All triggers at a glance — cron, webhooks, AI agents' },
                 { icon: '🔒', text: 'API keys encrypted at rest with AES-256-GCM' },
-                { icon: '⏱', text: 'Up and running in under 2 minutes' },
+                { icon: '🚀', text: 'Up and running in under 2 minutes' },
               ].map(({ icon, text }) => (
                 <div key={text} className="auth-point">
                   <span className="auth-point-icon">{icon}</span>
