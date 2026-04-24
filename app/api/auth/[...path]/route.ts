@@ -1,6 +1,10 @@
 import { createNeonAuth } from '@neondatabase/neon-js/auth/next/server'
 import { logAppError } from '../../../../lib/error-logging'
 
+type AuthMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+type NeonAuthHandlers = ReturnType<ReturnType<typeof createNeonAuth>['handler']>
+type AuthRouteContext = Parameters<NeonAuthHandlers['GET']>[1]
+
 const baseUrl = (
   process.env.NEXT_PUBLIC_NEON_AUTH_URL ??
   process.env.VITE_NEON_AUTH_URL ??
@@ -15,9 +19,7 @@ function getPathname(url: string): string {
   }
 }
 
-let neonAuthHandlers:
-  | ReturnType<ReturnType<typeof createNeonAuth>['handler']>
-  | undefined
+let neonAuthHandlers: NeonAuthHandlers | undefined
 let authInitializationError: unknown
 
 try {
@@ -46,7 +48,7 @@ try {
   console.error('[auth] initialization failed', err)
 }
 
-async function runAuthHandler(req: Request, method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH') {
+async function runAuthHandler(req: Request, ctx: AuthRouteContext, method: AuthMethod) {
   if (authInitializationError || !neonAuthHandlers) {
     await logAppError({
       source: 'auth',
@@ -69,7 +71,7 @@ async function runAuthHandler(req: Request, method: 'GET' | 'POST' | 'PUT' | 'DE
 
   const handler = neonAuthHandlers[method]
   try {
-    return await handler(req)
+    return await handler(req, ctx)
   } catch (err) {
     await logAppError({
       source: 'auth',
@@ -84,22 +86,22 @@ async function runAuthHandler(req: Request, method: 'GET' | 'POST' | 'PUT' | 'DE
   }
 }
 
-export async function GET(req: Request) {
-  return runAuthHandler(req, 'GET')
+export async function GET(req: Request, ctx: AuthRouteContext) {
+  return runAuthHandler(req, ctx, 'GET')
 }
 
-export async function POST(req: Request) {
-  return runAuthHandler(req, 'POST')
+export async function POST(req: Request, ctx: AuthRouteContext) {
+  return runAuthHandler(req, ctx, 'POST')
 }
 
-export async function PUT(req: Request) {
-  return runAuthHandler(req, 'PUT')
+export async function PUT(req: Request, ctx: AuthRouteContext) {
+  return runAuthHandler(req, ctx, 'PUT')
 }
 
-export async function DELETE(req: Request) {
-  return runAuthHandler(req, 'DELETE')
+export async function DELETE(req: Request, ctx: AuthRouteContext) {
+  return runAuthHandler(req, ctx, 'DELETE')
 }
 
-export async function PATCH(req: Request) {
-  return runAuthHandler(req, 'PATCH')
+export async function PATCH(req: Request, ctx: AuthRouteContext) {
+  return runAuthHandler(req, ctx, 'PATCH')
 }
