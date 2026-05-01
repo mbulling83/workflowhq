@@ -28,6 +28,10 @@ try {
     cookies: {
       secret: process.env.NEON_AUTH_COOKIE_SECRET!,
     },
+    session: {
+      expiresIn: 60 * 60 * 24 * 30, // 30 days
+      updateAge: 60 * 60 * 24,       // extend session on activity daily
+    },
   })
   neonAuthHandlers = auth.handler()
 } catch (err) {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { WorkflowList } from '@n8n/ui'
 import type { Workflow } from '@n8n/ui'
-import { fetchWorkflows, updateWorkflow, NoConnectionError } from '../services/n8nProxy'
+import { fetchWorkflows, updateWorkflow, NoConnectionError, UnauthorizedError } from '../services/n8nProxy'
 import { useConnection } from '../hooks/useConnection'
 import { TopNav } from '../components/TopNav'
 import { Sheet } from '@/components/ui/sheet'
@@ -53,6 +53,10 @@ export function DashboardScreen({ showBillingSection = true }: DashboardScreenPr
       const data = await fetchWorkflows()
       setWorkflows(data)
     } catch (err) {
+      if (err instanceof UnauthorizedError) {
+        router.replace('/auth/sign-in?from=/app')
+        return
+      }
       if (err instanceof NoConnectionError) {
         router.push('/onboard')
         return
@@ -170,7 +174,7 @@ export function DashboardScreen({ showBillingSection = true }: DashboardScreenPr
         )}
         <WorkflowList workflows={workflows} onWorkflowUpdate={loadWorkflows} updateWorkflow={updateWorkflow} n8nBaseUrl={connection?.n8n_url} />
       </main>
-      <Sheet open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+      <Sheet open={settingsOpen} onClose={() => setSettingsOpen(false)} aria-label="Settings">
         <SettingsScreen onClose={() => setSettingsOpen(false)} showBillingSection={showBillingSection} />
       </Sheet>
     </div>
