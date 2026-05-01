@@ -2,6 +2,16 @@ import { getSessionUser, parseJsonBody } from '../auth-helpers'
 import { getAppPool } from '../db-pool'
 import { withApiErrorHandling } from '../withApiErrorHandling'
 
+function parseAdminEmailAllowlist(): Set<string> {
+  const raw = process.env.FEEDBACK_ADMIN_EMAILS ?? ''
+  return new Set(
+    raw
+      .split(',')
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean)
+  )
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type',
@@ -117,6 +127,11 @@ async function announcementsHandler(req: Request): Promise<Response> {
   }
 
   if (req.method === 'POST') {
+    const allowlist = parseAdminEmailAllowlist()
+    if (!allowlist.size || !allowlist.has(user.email.toLowerCase())) {
+      return Response.json({ error: 'Forbidden' }, { status: 403, headers: corsHeaders })
+    }
+
     const { title, message, ctaLabel, ctaUrl } = await parseJsonBody<CreateAnnouncementBody>(req)
 
     if (!title?.trim() || !message?.trim()) {

@@ -59,8 +59,8 @@
 
 .prompt-edit-button:hover {
   background: var(--bg-secondary);
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--component-accent);
+  color: var(--component-accent);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px var(--shadow);
 }
@@ -107,8 +107,8 @@
 
 .prompt-textarea:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--focus-ring);
+  border-color: var(--component-accent);
+  box-shadow: 0 0 0 3px var(--component-focus-ring);
 }
 
 .prompt-textarea:disabled {
@@ -139,14 +139,14 @@
 }
 
 .prompt-button-save {
-  background: var(--accent);
+  background: var(--component-accent);
   color: white;
 }
 
 .prompt-button-save:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: var(--component-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px var(--focus-ring);
+  box-shadow: 0 2px 6px var(--component-focus-ring);
 }
 
 .prompt-button-cancel {

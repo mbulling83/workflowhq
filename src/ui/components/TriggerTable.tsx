@@ -67,6 +67,8 @@ function TriggerTable({ groupedByWorkflow, type, selectedWorkflowId, onSelectWor
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [primaryFilter, setPrimaryFilter] = useState<string>('all')
+  const [methodFilters, setMethodFilters] = useState<string[]>([])
+  const [methodFilterMode, setMethodFilterMode] = useState<'any' | 'all'>('any')
   const [secondaryFilter, setSecondaryFilter] = useState<string>('all')
   const [showFilterPanel, setShowFilterPanel] = useState(false)
 
@@ -121,7 +123,9 @@ function TriggerTable({ groupedByWorkflow, type, selectedWorkflowId, onSelectWor
 
   const primaryFilterOptions = useMemo(() => {
     if (type === 'cron') return Array.from(new Set(rows.map((r) => r.frequency))).sort()
-    if (type === 'webhook') return Array.from(new Set(rows.map((r) => r.method))).sort()
+    if (type === 'webhook') return Array.from(
+      new Set(rows.flatMap((r) => r.method.split(',').map((m) => m.trim()).filter(Boolean)))
+    ).sort()
     if (type === 'ai') return Array.from(new Set(rows.map((r) => r.provider))).sort()
     return []
   }, [rows, type])
@@ -138,9 +142,16 @@ function TriggerTable({ groupedByWorkflow, type, selectedWorkflowId, onSelectWor
       if (statusFilter === 'active' && !row.active) return false
       if (statusFilter === 'inactive' && row.active) return false
 
+      if (type === 'webhook' && methodFilters.length > 0) {
+        const rowMethods = row.method.split(',').map((m) => m.trim().toUpperCase())
+        const check = methodFilterMode === 'all'
+          ? methodFilters.every((m) => rowMethods.includes(m.toUpperCase()))
+          : methodFilters.some((m) => rowMethods.includes(m.toUpperCase()))
+        if (!check) return false
+      }
+
       if (primaryFilter !== 'all') {
         if (type === 'cron' && row.frequency !== primaryFilter) return false
-        if (type === 'webhook' && row.method !== primaryFilter) return false
         if (type === 'ai' && row.provider !== primaryFilter) return false
       }
 
@@ -152,7 +163,7 @@ function TriggerTable({ groupedByWorkflow, type, selectedWorkflowId, onSelectWor
 
       return true
     })
-  }, [rows, statusFilter, primaryFilter, secondaryFilter, type])
+  }, [rows, statusFilter, primaryFilter, methodFilters, methodFilterMode, secondaryFilter, type])
 
   const sortedRows = useMemo(() => {
     const direction = sortDirection === 'asc' ? 1 : -1
@@ -192,7 +203,7 @@ function TriggerTable({ groupedByWorkflow, type, selectedWorkflowId, onSelectWor
 
   const activeFilterCount = [
     statusFilter !== 'all',
-    primaryFilter !== 'all',
+    type === 'webhook' ? methodFilters.length > 0 : primaryFilter !== 'all',
     secondaryFilter !== 'all',
   ].filter(Boolean).length
 
@@ -267,24 +278,63 @@ function TriggerTable({ groupedByWorkflow, type, selectedWorkflowId, onSelectWor
 
           {(type === 'cron' || type === 'webhook' || type === 'ai') && (
             <>
-              <div className="space-y-1">
-                <label className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {type === 'cron' ? 'Frequency' : type === 'webhook' ? 'Method' : 'Provider'}
-                </label>
-                <select
-                  className="w-full rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1 text-xs"
-                  value={primaryFilter}
-                  onChange={(e) => {
-                    setPrimaryFilter(e.target.value)
-                    setCurrentPage(1)
-                  }}
-                >
-                  <option value="all">All</option>
-                  {primaryFilterOptions.map((value) => (
-                    <option key={value} value={value}>{value}</option>
-                  ))}
-                </select>
-              </div>
+              {type === 'webhook' ? (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] text-slate-500 dark:text-slate-400">Method</label>
+                    {methodFilters.length > 1 && (
+                      <div className="flex items-center rounded border border-slate-200 dark:border-slate-700 overflow-hidden text-[10px]">
+                        <button
+                          className={`px-1.5 py-0.5 ${methodFilterMode === 'any' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                          onClick={() => setMethodFilterMode('any')}
+                        >Any</button>
+                        <button
+                          className={`px-1.5 py-0.5 ${methodFilterMode === 'all' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                          onClick={() => setMethodFilterMode('all')}
+                        >All</button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1.5 pt-0.5">
+                    {primaryFilterOptions.map((method) => (
+                      <label key={method} className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-slate-700 dark:text-slate-300">
+                        <input
+                          type="checkbox"
+                          className="h-3.5 w-3.5 rounded border-slate-300 accent-slate-900 dark:border-slate-600 dark:accent-slate-100"
+                          checked={methodFilters.includes(method)}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...methodFilters, method]
+                              : methodFilters.filter((m) => m !== method)
+                            setMethodFilters(next)
+                            setCurrentPage(1)
+                          }}
+                        />
+                        {method}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <label className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {type === 'cron' ? 'Frequency' : 'Provider'}
+                  </label>
+                  <select
+                    className="w-full rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1 text-xs"
+                    value={primaryFilter}
+                    onChange={(e) => {
+                      setPrimaryFilter(e.target.value)
+                      setCurrentPage(1)
+                    }}
+                  >
+                    <option value="all">All</option>
+                    {primaryFilterOptions.map((value) => (
+                      <option key={value} value={value}>{value}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="space-y-1">
                 <label className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -313,6 +363,8 @@ function TriggerTable({ groupedByWorkflow, type, selectedWorkflowId, onSelectWor
               onClick={() => {
                 setStatusFilter('all')
                 setPrimaryFilter('all')
+                setMethodFilters([])
+                setMethodFilterMode('any')
                 setSecondaryFilter('all')
                 setCurrentPage(1)
               }}

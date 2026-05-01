@@ -29,6 +29,7 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
     sortOrder: 'asc',
   })
   const [layout, setLayout] = useState<LayoutType>(() => {
+    if (typeof window === 'undefined') return 'list'
     const saved = localStorage.getItem('workflow-layout')
     if (saved === 'masonry' || (saved !== 'list' && saved !== 'grid' && saved !== 'table')) {
       return 'list'
@@ -38,6 +39,7 @@ function WorkflowList({ workflows, onWorkflowUpdate, updateWorkflow, n8nBaseUrl 
   const [selectedWorkflowByTab, setSelectedWorkflowByTab] = useState<Record<string, string | undefined>>({})
 
   const [cronView, setCronView] = useState<'list' | 'calendar'>(() => {
+    if (typeof window === 'undefined') return 'list'
     const saved = localStorage.getItem('cron-view')
     return (saved as 'list' | 'calendar') || 'list'
   })

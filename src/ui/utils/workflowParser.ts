@@ -60,20 +60,35 @@ interface AIAgentClassification {
   reason: string
 }
 
+// Langchain sub-node kinds that attach to agents/chains but are not agents themselves.
+// The node type format is: @n8n/n8n-nodes-langchain.<kind>
+const LANGCHAIN_SUBNODE_PREFIXES = [
+  'lm',            // language models (lmChatOpenAi, lmChatAnthropic, …)
+  'outputparser',  // output parsers
+  'tool',          // tools
+  'memory',        // memory nodes
+  'document',      // document loaders
+  'embedding',     // embeddings
+  'textsplitter',  // text splitters
+  'retriever',     // retrievers
+  'vectorstore',   // vector stores
+]
+
 function classifyAIAgentNode(nodeType: string): AIAgentClassification {
   const type = nodeType.toLowerCase()
   const isLangchainNode = type.includes('langchain')
   if (!isLangchainNode) {
-    return {
-      isAgent: false,
-      reason: 'not-langchain-node',
-    }
+    return { isAgent: false, reason: 'not-langchain-node' }
   }
 
-  return {
-    isAgent: true,
-    reason: 'langchain-node',
+  // Extract the kind portion after the last dot (e.g. "lmChatOpenAi" → "lmchatopenai")
+  const kind = type.split('.').pop() ?? ''
+  const isSubNode = LANGCHAIN_SUBNODE_PREFIXES.some((prefix) => kind.startsWith(prefix))
+  if (isSubNode) {
+    return { isAgent: false, reason: 'langchain-subnode' }
   }
+
+  return { isAgent: true, reason: 'langchain-node' }
 }
 
 function isAIDebugEnabled(): boolean {
@@ -167,13 +182,12 @@ export function parseWorkflows(workflows: Workflow[], baseUrl?: string): Trigger
         nodeId: node.id,
         nodeName: node.name,
         nodeType: node.type,
+        node,
         ...classification,
       }
     })
 
-    const aiAgentNodes = workflow.nodes.filter((node) =>
-      classifyAIAgentNode(node.type).isAgent
-    )
+    const aiAgentNodes = aiNodeDiagnostics.filter((d) => d.isAgent).map((d) => d.node)
 
     if (isAIDebugEnabled()) {
       const suspectedAiNodes = aiNodeDiagnostics.filter((node) => {

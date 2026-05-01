@@ -212,31 +212,46 @@ export function FeedbackWidget() {
 
             <div className="space-y-2">
               <Label htmlFor="feedback-message">What happened? What should improve?</Label>
-              <Textarea
-                id="feedback-message"
-                className="min-h-40 border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 focus-visible:border-slate-300 focus-visible:ring-slate-300"
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-                placeholder="Share your bug report, idea, or general feedback..."
-              />
+              <div className="relative">
+                <Textarea
+                  id="feedback-message"
+                  className="min-h-40 resize-none border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 focus-visible:border-slate-300 focus-visible:ring-slate-300"
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  placeholder="Share your bug report, idea, or general feedback..."
+                />
+                {speechSupported && (
+                  <button
+                    type="button"
+                    onClick={recording ? stopRecording : startRecording}
+                    aria-label={recording ? 'Stop voice input' : 'Use microphone'}
+                    title={recording ? 'Stop voice input' : 'Use microphone'}
+                    className={`absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 ${
+                      recording
+                        ? 'bg-red-500 text-white shadow-md'
+                        : 'bg-slate-200/60 text-slate-400 hover:bg-slate-300 hover:text-slate-600'
+                    }`}
+                  >
+                    {recording ? (
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                        <rect x="1.5" y="1.5" width="7" height="7" rx="1" />
+                      </svg>
+                    ) : (
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="4.5" y="1" width="4" height="6" rx="2" />
+                        <path d="M2 6.5a4.5 4.5 0 0 0 9 0" />
+                        <line x1="6.5" y1="11" x2="6.5" y2="12.5" />
+                        <line x1="4.5" y1="12.5" x2="8.5" y2="12.5" />
+                      </svg>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500">
               Page captured: <span className="font-medium text-slate-700">{pathname ?? '/'}</span>
             </div>
-
-            {speechSupported && (
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="min-h-10 bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  onClick={recording ? stopRecording : startRecording}
-                >
-                  {recording ? 'Stop voice input' : 'Use microphone'}
-                </Button>
-              </div>
-            )}
 
             {error && (
               <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">

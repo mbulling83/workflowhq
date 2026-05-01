@@ -23,7 +23,7 @@ let neonAuthHandlers: NeonAuthHandlers | undefined
 let authInitializationError: unknown
 
 try {
-  const auth = createNeonAuth({
+  const authConfig = {
     baseUrl,
     cookies: {
       secret: process.env.NEON_AUTH_COOKIE_SECRET!,
@@ -32,7 +32,9 @@ try {
       expiresIn: 60 * 60 * 24 * 30, // 30 days
       updateAge: 60 * 60 * 24,       // extend session on activity daily
     },
-  })
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auth = createNeonAuth(authConfig as any)
   neonAuthHandlers = auth.handler()
 } catch (err) {
   authInitializationError = err

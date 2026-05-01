@@ -247,6 +247,8 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
         .auth-form-shell input {
           border-radius: 10px;
           border-color: #cbd5e1;
+          color: #0f172a !important;
+          background-color: #ffffff !important;
         }
 
         .auth-form-shell input:focus-visible {

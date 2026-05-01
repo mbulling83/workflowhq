@@ -206,10 +206,10 @@ function FilterBar({ triggers, type, filters, onFilterChange }: FilterBarProps) 
                 {uniqueHttpMethods.map(method => {
                   const isChecked = filters.httpMethods?.includes(method) || false
                   return (
-                    <label key={method} className="flex items-center gap-1 cursor-pointer">
+                    <label key={method} className="flex items-center gap-1.5 cursor-pointer select-none">
                       <input
                         type="checkbox"
-                        className="rounded border-slate-300 dark:border-slate-600 accent-slate-900 dark:accent-slate-100"
+                        className="h-3.5 w-3.5 rounded border-slate-300 accent-slate-900 dark:border-slate-600 dark:accent-slate-100"
                         checked={isChecked}
                         onChange={(e) => {
                           const currentMethods = filters.httpMethods || []
