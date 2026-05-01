@@ -124,6 +124,7 @@ export function DashboardScreen({ showBillingSection = true }: DashboardScreenPr
   }
 
   if (error) {
+    const isCredentialError = error.toLowerCase().includes('api key') || error.toLowerCase().includes('permission') || error.toLowerCase().includes('settings')
     return (
       <div className="min-h-screen flex flex-col">
         <TopNav onSettingsClick={() => setSettingsOpen(true)} />
@@ -133,13 +134,18 @@ export function DashboardScreen({ showBillingSection = true }: DashboardScreenPr
               <AlertDescription>{error}</AlertDescription>
             </Alert>
             <div className="flex gap-2">
-              <Button onClick={loadWorkflows} className="flex-1">Retry</Button>
-              <Button variant="outline" onClick={() => setSettingsOpen(true)}>
-                Update credentials
+              {!isCredentialError && (
+                <Button onClick={loadWorkflows} className="flex-1">Try again</Button>
+              )}
+              <Button variant={isCredentialError ? 'default' : 'outline'} className={isCredentialError ? 'flex-1' : ''} onClick={() => setSettingsOpen(true)}>
+                {isCredentialError ? 'Update n8n connection' : 'Check settings'}
               </Button>
             </div>
           </div>
         </div>
+        <Sheet open={settingsOpen} onClose={() => setSettingsOpen(false)} aria-label="Settings">
+          <SettingsScreen onClose={() => setSettingsOpen(false)} showBillingSection={showBillingSection} />
+        </Sheet>
       </div>
     )
   }

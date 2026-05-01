@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authClient } from '../lib/auth'
 import { readApiError } from '../lib/readApiError'
-import { verifyConnection } from '../services/n8nProxy'
+import { verifyConnection, UnauthorizedError } from '../services/n8nProxy'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -41,8 +41,12 @@ export function OnboardingScreen() {
       await verifyConnection(n8nUrl, apiKey)
       setTestState('success')
     } catch (err) {
+      if (err instanceof UnauthorizedError) {
+        router.replace('/auth/sign-in?from=/onboard')
+        return
+      }
       setTestState('error')
-      setTestError(err instanceof Error ? err.message : 'Connection failed')
+      setTestError(err instanceof Error ? err.message : 'Could not connect. Please check the URL and API key.')
     }
   }
 
@@ -50,7 +54,10 @@ export function OnboardingScreen() {
     setSaving(true)
     try {
       const { data: session } = await authClient.getSession()
-      if (!session) throw new Error('Not authenticated')
+      if (!session) {
+        router.replace('/auth/sign-in?from=/onboard')
+        return
+      }
       const res = await fetch('/api/connection', {
         method: 'POST',
         headers: {
@@ -59,10 +66,14 @@ export function OnboardingScreen() {
         },
         body: JSON.stringify({ n8nUrl, apiKey }),
       })
+      if (res.status === 401) {
+        router.replace('/auth/sign-in?from=/onboard')
+        return
+      }
       if (!res.ok) throw new Error(await readApiError(res))
       router.push('/app')
     } catch (err) {
-      setTestError(err instanceof Error ? err.message : 'Failed to save credentials')
+      setTestError(err instanceof Error ? err.message : 'Could not save your connection. Please try again.')
       setSaving(false)
     }
   }

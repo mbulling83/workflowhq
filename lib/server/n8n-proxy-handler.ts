@@ -34,6 +34,23 @@ function extractToken(req: Request): string | null {
   return raw?.startsWith('Bearer ') ? raw.slice(7) : null
 }
 
+function friendlyN8nError(err: N8nHttpError): { httpStatus: number; message: string } {
+  switch (true) {
+    case err.status === 401:
+      return { httpStatus: 400, message: 'Your n8n API key is invalid or has been revoked. Go to Settings → n8n Connection to update it.' }
+    case err.status === 403:
+      return { httpStatus: 400, message: 'Your n8n API key doesn\'t have permission to read workflows. Check the key scopes in your n8n instance.' }
+    case err.status === 404:
+      return { httpStatus: 400, message: 'Your n8n instance URL appears to be incorrect or unreachable. Double-check it in Settings.' }
+    case err.status === 429:
+      return { httpStatus: 429, message: 'n8n is rate-limiting requests right now. Please wait a moment and try again.' }
+    case err.status >= 500:
+      return { httpStatus: 502, message: 'Your n8n instance returned a server error and may be temporarily unavailable. Try again in a moment.' }
+    default:
+      return { httpStatus: 502, message: `Unexpected response from n8n (status ${err.status}). Please try again.` }
+  }
+}
+
 async function n8nProxyHandler(req: Request): Promise<Response> {
   const reqId = mkReqId()
   const t0 = Date.now()
@@ -124,8 +141,15 @@ async function n8nProxyHandler(req: Request): Promise<Response> {
     }
     return Response.json({ error: 'Unknown action' }, { status: 400, headers: withTraceHeaders(corsHeaders) })
   } catch (err) {
-    if (err instanceof N8nHttpError) return Response.json({ error: err.message }, { status: err.status, headers: withTraceHeaders(corsHeaders) })
-    const message = err instanceof Error ? (err.name === 'AbortError' ? `Connection timed out after ${N8N_FETCH_TIMEOUT_MS}ms — check the n8n URL/network reachability` : err.message) : 'Internal error'
+    if (err instanceof N8nHttpError) {
+      const { httpStatus, message } = friendlyN8nError(err)
+      return Response.json({ error: message }, { status: httpStatus, headers: withTraceHeaders(corsHeaders) })
+    }
+    const message = err instanceof Error
+      ? (err.name === 'AbortError'
+          ? 'Could not reach your n8n instance — it may be offline or the URL is incorrect.'
+          : err.message)
+      : 'An unexpected error occurred. Please try again.'
     return Response.json({ error: message }, { status: 500, headers: withTraceHeaders(corsHeaders) })
   }
 }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authClient } from '../lib/auth'
 import { readApiError } from '../lib/readApiError'
-import { verifyConnection } from '../services/n8nProxy'
+import { verifyConnection, UnauthorizedError } from '../services/n8nProxy'
 import { useAuth } from '../hooks/useAuth'
 import { useConnection } from '../hooks/useConnection'
 import { Button } from '@/components/ui/button'
@@ -62,8 +62,12 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
       await verifyConnection(newUrl || connection?.n8n_url || '', newKey)
       setTestState('success')
     } catch (err) {
+      if (err instanceof UnauthorizedError) {
+        router.replace('/auth/sign-in?from=/app')
+        return
+      }
       setTestState('error')
-      setTestError(err instanceof Error ? err.message : 'Connection failed')
+      setTestError(err instanceof Error ? err.message : 'Could not connect. Please check the URL and API key.')
     }
   }
 
@@ -71,7 +75,10 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
     setSavingConnection(true)
     try {
       const { data: session } = await authClient.getSession()
-      if (!session) throw new Error('Not authenticated')
+      if (!session) {
+        router.replace('/auth/sign-in?from=/app')
+        return
+      }
       const res = await fetch('/api/connection', {
         method: 'PUT',
         headers: {
@@ -80,13 +87,17 @@ export function SettingsScreen({ onClose, showBillingSection = true }: SettingsS
         },
         body: JSON.stringify({ n8nUrl: newUrl || connection?.n8n_url, apiKey: newKey }),
       })
+      if (res.status === 401) {
+        router.replace('/auth/sign-in?from=/app')
+        return
+      }
       if (!res.ok) throw new Error(await readApiError(res))
       setEditingConnection(false)
       setNewUrl('')
       setNewKey('')
       setTestState('idle')
     } catch (err) {
-      setTestError(err instanceof Error ? err.message : 'Failed to save')
+      setTestError(err instanceof Error ? err.message : 'Could not save your connection. Please try again.')
     } finally {
       setSavingConnection(false)
     }
