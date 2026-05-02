@@ -41,6 +41,8 @@ const CATEGORY_OPTIONS: Array<{ value: FeedbackCategory; label: string }> = [
 
 export function FeedbackWidget() {
   const pathname = usePathname()
+  const isAuthPage = pathname?.startsWith('/auth/') || pathname === '/signin' || pathname === '/signup'
+
   const [open, setOpen] = useState(false)
   const [category, setCategory] = useState<FeedbackCategory>('feedback')
   const [message, setMessage] = useState('')
@@ -158,6 +160,8 @@ export function FeedbackWidget() {
       setSubmitting(false)
     }
   }, [category, message, pathname, usedVoiceInput])
+
+  if (isAuthPage) return null
 
   return (
     <>

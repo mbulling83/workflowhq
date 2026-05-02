@@ -238,10 +238,24 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
           background: #ffffff;
           box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255, 255, 255, 0.85) inset;
           padding: 0.75rem 0.25rem 0.25rem;
+          color: #0f172a;
         }
 
         .auth-form-shell :is(input, button, a) {
           transition: border-color 140ms ease-out, box-shadow 140ms ease-out, background-color 140ms ease-out, color 140ms ease-out, transform 120ms ease-out;
+        }
+
+        .auth-form-shell label,
+        .auth-form-shell p,
+        .auth-form-shell span,
+        .auth-form-shell h1,
+        .auth-form-shell h2,
+        .auth-form-shell h3 {
+          color: #0f172a !important;
+        }
+
+        .auth-form-shell a {
+          color: #4f46e5 !important;
         }
 
         .auth-form-shell input {
@@ -285,7 +299,7 @@ export default function AuthPathPage({ params }: { params: { path: string } }) {
         }
 
         .auth-form-shell a:hover {
-          color: #1f2937;
+          color: #1f2937 !important;
         }
 
         .auth-form-shell :is(button, a):focus-visible {
